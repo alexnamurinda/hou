@@ -1,0 +1,237 @@
+/* =============================================
+   PAGE HEADER (Contact)
+   ============================================= */
+.page-header {
+    background:
+        linear-gradient(rgba(15,23,42,.82), rgba(15,23,42,.65)),
+        url('../images/contact.jpg') center/cover no-repeat;
+    padding: 150px 0 80px;
+    color: #fff;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.page-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 4px;
+    background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+}
+
+.page-header h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 800;
+    margin-bottom: 1rem;
+}
+
+.breadcrumb { display: inline-flex; background: transparent; }
+.breadcrumb-item a { color: rgba(255,255,255,.8); text-decoration: none; transition: color .3s; }
+.breadcrumb-item a:hover { color: #fff; }
+.breadcrumb-item.active { color: rgba(255,255,255,.6); }
+.breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,.4); }
+
+/* =============================================
+   CONTACT INFO SECTION
+   ============================================= */
+.contact-info-section {
+    padding: 5.5rem 0;
+    background: #f8fafc;
+}
+
+.contact-info-card {
+    background: linear-gradient(145deg, #ffffff, #f0f6ff);
+    border: 1.5px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+}
+
+.contact-info-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 3px;
+    background: linear-gradient(135deg, #2563eb, #0ea5e9);
+    border-radius: 16px 16px 0 0;
+    opacity: 0;
+    transition: opacity .3s;
+}
+
+.contact-info-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 36px rgba(37,99,235,.14);
+    border-color: rgba(37,99,235,.25);
+}
+
+.contact-info-card:hover::before { opacity: 1; }
+
+.contact-info-card h3 { font-size: 1.15rem; font-weight: 700; margin: .75rem 0 .65rem; color: #0f172a; }
+.contact-info-card p  { color: #64748b; font-size: .9rem; margin-bottom: .5rem; }
+.contact-info-card p a { color: #2563eb; transition: color .3s; }
+.contact-info-card p a:hover { color: #1d4fd8; }
+
+.icon-wrapper {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(37,99,235,.1), rgba(14,165,233,.1));
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto;
+    transition: all .3s ease;
+}
+
+.contact-info-card:hover .icon-wrapper {
+    background: linear-gradient(135deg, #2563eb, #0ea5e9);
+}
+
+.icon-wrapper i {
+    font-size: 1.6rem;
+    color: #2563eb;
+    transition: color .3s;
+    animation: pulse 2.5s ease-in-out infinite;
+}
+
+.contact-info-card:hover .icon-wrapper i { color: #fff; animation: none; }
+
+@keyframes pulse {
+    0%,100% { transform: scale(1);    opacity: 1; }
+    50%      { transform: scale(1.1); opacity: .85; }
+}
+
+/* ---- "Call Us" card: badge style ---- */
+.call-badge {
+    position: relative;
+    width: 110px;
+    height: 110px;
+    margin: 0 auto 1.1rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(37,99,235,.08), rgba(14,165,233,.08));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.call-badge-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 3px solid rgba(37,99,235,.12);
+    border-top-color: #2563eb;
+    border-right-color: #0ea5e9;
+    animation: callRingSpin 6s linear infinite;
+}
+
+@keyframes callRingSpin {
+    to { transform: rotate(360deg); }
+}
+
+.call-badge-inner {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .15rem;
+}
+
+.call-badge-inner i {
+    font-size: 1.35rem;
+    color: #2563eb;
+    margin-bottom: .15rem;
+    animation: none;
+}
+
+.call-badge-247 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1;
+}
+
+.call-badge-support {
+    font-size: .55rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    color: #64748b;
+}
+
+.call-number {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: .45rem;
+}
+
+.call-number i { margin-right: .5rem; }
+.call-number .fa-phone-alt { color: #2563eb; }
+.call-number .fa-whatsapp { color: #25d366; }
+
+.call-number a { color: #0f172a; text-decoration: none; transition: color .3s; }
+.call-number a:hover { color: #2563eb; }
+
+/* =============================================
+   FAQ SECTION
+   ============================================= */
+.faq-section {
+    padding: 5.5rem 0;
+    background: #fff;
+}
+
+/* =============================================
+   FAQ ACCORDION
+   ============================================= */
+.accordion-item {
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px !important;
+    margin-bottom: .65rem;
+    overflow: hidden;
+}
+
+.accordion-button {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: .92rem;
+    color: #0f172a;
+    background: linear-gradient(145deg, #fff, #f8fafc);
+    border-radius: 12px !important;
+}
+
+.accordion-button:not(.collapsed) {
+    background: linear-gradient(135deg, rgba(37,99,235,.08), rgba(14,165,233,.06));
+    color: #2563eb;
+    box-shadow: none;
+}
+
+.accordion-button::after { filter: none; }
+
+.accordion-button:not(.collapsed)::after {
+    filter: invert(34%) sepia(90%) saturate(1500%) hue-rotate(207deg);
+}
+
+.accordion-button:focus { box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+
+.accordion-body { font-size: .9rem; color: #475569; line-height: 1.7; }
+
+/* =============================================
+   BACK TO TOP (contact page override)
+   ============================================= */
+.back-to-top.show { opacity: 1; visibility: visible; }
+
+/* =============================================
+   RESPONSIVE
+   ============================================= */
+@media (max-width: 991px) {
+    .page-header { padding: 130px 0 60px; }
+}
+
+@media (max-width: 767px) {
+    .page-header h1 { font-size: 2rem; }
+    .contact-info-section,
+    .faq-section { padding: 3.5rem 0; }
+    .contact-info-card { margin-bottom: 1.5rem; }
+}

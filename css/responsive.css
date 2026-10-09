@@ -1,0 +1,112 @@
+/* =============================================
+   LARGE — < 1200px
+   ============================================= */
+@media (max-width: 1199.98px) {
+    .navbar-nav .nav-link { margin: 0 .2rem; }
+    .hero-title { font-size: 2rem; }
+
+    .service-icon {
+        width: 66px; height: 66px;
+        font-size: 1.75rem;
+        line-height: 66px;
+    }
+}
+
+/* =============================================
+   MEDIUM — < 992px  (tablet / hamburger)
+   ============================================= */
+@media (max-width: 991.98px) {
+    .navbar {
+        background: rgba(255,255,255,.97) !important;
+        box-shadow: 0 2px 20px rgba(15,23,42,.08);
+        backdrop-filter: none !important;
+        padding: .5rem 0;
+    }
+
+    .navbar-nav .nav-link {
+        margin: .25rem 0;
+        font-size: 1.05rem;
+        text-align: center;
+    }
+
+    .navbar-nav .nav-link::after { display: none; }
+
+    .navbar-nav .nav-link.active,
+    .navbar-nav .nav-link:hover {
+        background: linear-gradient(135deg, rgba(37,99,235,.08), rgba(14,165,233,.06));
+        border-radius: 8px;
+    }
+
+    .nav-join-btn {
+        display: inline-block;
+        margin: .5rem auto 0;
+    }
+
+    .navbar-toggler { border: none; padding: .4rem; }
+    .navbar-toggler:focus { box-shadow: 0 0 0 2px rgba(37,99,235,.25); }
+
+    .navbar-nav { padding: .75rem 0; }
+
+    .hero-flier-img { height: 72vh; min-height: 380px; }
+
+    .about-content { padding-left: 0; margin-top: 2rem; }
+
+    .footer h4::after { left: 50%; transform: translateX(-50%); }
+
+    .footer-info, .footer-links, .footer-contact { margin-bottom: 1.5rem; }
+}
+
+/* =============================================
+   SMALL — < 768px
+   ============================================= */
+@media (max-width: 767.98px) {
+    .logo-img { height: 40px; }
+    .brand-wordmark { max-width: 190px; font-size: .85rem; }
+
+    .hero-flier-img { height: 56vw; min-height: 220px; }
+
+    .hero-arrow-icon { width: 40px; height: 40px; font-size: .85rem; }
+    .carousel-control-prev.hero-arrow { left: .6rem; }
+    .carousel-control-next.hero-arrow { right: .6rem; }
+
+    section { padding: 3rem 0; }
+
+    .section-header { margin-bottom: 2rem; }
+    .section-header h2 { font-size: 1.75rem; }
+
+    .hero-title { font-size: 1.75rem; }
+    .hero-text  { font-size: .95rem; }
+
+    .footer { padding-top: 2.5rem; }
+
+    .footer-links-bottom a { margin-left: .75rem; }
+    .copyright, .footer-links-bottom { text-align: center !important; }
+    .footer-links-bottom { margin-top: .75rem; }
+
+    .back-to-top { bottom: 20px; right: 16px; }
+}
+
+/* =============================================
+   X-SMALL — < 576px  (portrait phones)
+   ============================================= */
+@media (max-width: 575.98px) {
+    .hero-title  { font-size: 1.65rem; }
+    .hero-text   { font-size: .9rem; }
+
+    .section-header h2 { font-size: 1.65rem; }
+
+    .service-icon {
+        width: 58px; height: 58px;
+        font-size: 1.4rem;
+        line-height: 58px;
+    }
+
+    .about-content h2 { font-size: 1.6rem; }
+
+    /* FAB cluster — compact on small phones */
+    .fab-cluster { bottom: 18px; right: 16px; gap: 10px; }
+    .fab-btn { width: 46px; height: 46px; font-size: 1.1rem; }
+    #ai-chat-toggle { width: 46px !important; height: 46px !important; font-size: 1.15rem !important; }
+
+    .back-to-top { width: 40px; height: 40px; }
+}

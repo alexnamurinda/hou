@@ -1,0 +1,115 @@
+/* =============================================
+   THANK YOU / CONNECTED SPLASH PAGE
+   Mobile-first — shown right after hotspot connect
+   ============================================= */
+.ty-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(160deg, #eff6ff 0%, #f8fafc 55%, #ffffff 100%);
+    padding: 1rem;
+}
+
+.ty-wrap {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* ── Flier image ── */
+.ty-flier {
+    width: 100%;
+    display: block;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+}
+
+/* ── Optional welcome strip (hotspot username/expiry) ── */
+.ty-welcome {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: var(--radius-sm);
+    padding: .6rem .9rem;
+    font-size: .82rem;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+}
+
+.ty-welcome i {
+    color: var(--blue);
+}
+
+.ty-welcome-expiry {
+    color: var(--text-muted);
+}
+
+/* ── WhatsApp join banner ── */
+.ty-wa-banner {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+    background: linear-gradient(135deg, #1fb955 0%, #128c4e 100%);
+    border-radius: var(--radius-lg);
+    padding: .9rem 1.1rem;
+    text-decoration: none;
+    box-shadow: 0 8px 24px rgba(18, 140, 78, .35);
+    transition: var(--transition);
+}
+
+.ty-wa-banner:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(18, 140, 78, .45);
+}
+
+.ty-wa-icon {
+    flex-shrink: 0;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    color: #fff;
+}
+
+.ty-wa-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: .1rem;
+}
+
+.ty-wa-title {
+    color: #fff;
+    font-weight: 800;
+    font-size: .98rem;
+}
+
+.ty-wa-sub {
+    color: rgba(255, 255, 255, .85);
+    font-weight: 500;
+    font-size: .78rem;
+}
+
+.ty-wa-arrow {
+    flex-shrink: 0;
+    color: rgba(255, 255, 255, .8);
+    font-size: .9rem;
+}
+
+/* ── Larger screens: keep it as a centered compact card, not stretched ── */
+@media (min-width: 480px) {
+    .ty-wrap {
+        max-width: 460px;
+    }
+}

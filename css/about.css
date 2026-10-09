@@ -1,0 +1,608 @@
+/* =============================================
+   PAGE HEADER (About / inner pages)
+   ============================================= */
+.page-header {
+    background:
+        linear-gradient(rgba(15,23,42,.78), rgba(15,23,42,.65)),
+        url('../images/aboutus.jpg') center/cover no-repeat;
+    padding: 150px 0 80px;
+    color: #fff;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.page-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 4px;
+    background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+}
+
+.page-header h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 800;
+    margin-bottom: 1rem;
+    letter-spacing: -.5px;
+}
+
+.breadcrumb { display: inline-flex; background: transparent; }
+
+.breadcrumb-item a {
+    color: rgba(255,255,255,.8);
+    text-decoration: none;
+    transition: color .3s;
+}
+
+.breadcrumb-item a:hover { color: #fff; }
+.breadcrumb-item.active { color: rgba(255,255,255,.6); }
+.breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,.4); }
+
+/* =============================================
+   OUR STORY SECTION
+   ============================================= */
+.our-story-section {
+    padding: 0rem 0;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+}
+.story-content{
+    max-width: 550px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+}
+.story-content h3 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: .5rem;
+}
+
+.story-content .lead {
+    font-size: 1.05rem;
+    color: #2563eb;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+}
+
+.story-content p { margin-bottom: 1rem; line-height: 1.8; color: #475569; text-align: justify; }
+
+.story-stats {
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.story-stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.story-stat-value {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #2563eb;
+    line-height: 1.1;
+}
+
+.story-stat-label {
+    font-size: .82rem;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.story-image { position: relative; padding: .5rem; }
+
+.story-image img {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+}
+
+.story-image::after {
+    content: '';
+    position: absolute;
+    bottom: -8px; right: -8px;
+    width: 72%; height: 72%;
+    border: 3px solid #2563eb;
+    border-radius: 12px;
+    z-index: -1;
+    opacity: .3;
+}
+
+/* =============================================
+   TEAM SECTION
+   ============================================= */
+.team-section {
+    padding: 5rem 0 4rem;
+    background: #e4f0fb;
+}
+
+/* ---- Management hierarchy (org chart) ---- */
+.org-chart {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 4rem;
+}
+
+.org-connector {
+    width: 2px;
+    height: 32px;
+    background: #b8cedf;
+}
+
+/* ---- Top tier: Mark (left) — CEO (centre) — Admin (right) ---- */
+.org-tier-top {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 2rem 2.5rem;
+}
+
+.org-tier-top::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 12%;
+    right: 12%;
+    height: 2px;
+    background: #b8cedf;
+    z-index: 0;
+}
+
+.org-branch {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.org-tier-managers {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem 1.25rem;
+    padding-top: 1.75rem;
+}
+
+.org-tier-managers::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 95px;
+    right: 95px;
+    height: 2px;
+    background: #b8cedf;
+}
+
+.org-card {
+    position: relative;
+    z-index: 1;
+    width: 190px;
+    background: #fff;
+    border: 1.5px solid #cce0f0;
+    border-radius: 14px;
+    padding: 1.25rem 1rem 1.1rem;
+    text-align: center;
+    transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+}
+
+.org-tier-managers .org-card::before {
+    content: '';
+    position: absolute;
+    top: -1.75rem;
+    left: 50%;
+    width: 2px;
+    height: 1.75rem;
+    background: #b8cedf;
+}
+
+.org-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 26px rgba(37,99,235,.12);
+    border-color: rgba(37,99,235,.3);
+}
+
+.org-card-ceo {
+    width: 230px;
+    padding: 1.5rem 1.25rem 1.3rem;
+    border-color: rgba(37,99,235,.35);
+    box-shadow: 0 10px 30px rgba(37,99,235,.15);
+}
+
+.org-avatar {
+    display: block;
+    width: 64px; height: 64px;
+    margin: 0 auto .75rem;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: top center;
+    border: 2px solid rgba(37,99,235,.18);
+}
+
+.org-card-ceo .org-avatar { width: 84px; height: 84px; }
+
+.org-card h5 {
+    font-size: .92rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 2px;
+}
+
+.org-card-ceo h5 { font-size: 1.05rem; }
+
+.org-role {
+    display: block;
+    font-size: .72rem;
+    color: #2563eb;
+    font-weight: 600;
+    margin-bottom: .35rem;
+}
+
+.org-card .team-social { justify-content: center; margin-top: .4rem; }
+
+@media (max-width: 767.98px) {
+    .org-tier-top { flex-direction: column; }
+    .org-tier-top::before { display: none; }
+    .org-card-ceo { order: -1; }
+
+    .org-tier-managers { flex-direction: column; align-items: center; padding-top: 1rem; }
+    .org-tier-managers::before { display: none; }
+    .org-tier-managers .org-card::before { display: none; }
+}
+
+/* Social icons — shared by leader cards AND agent cards */
+.team-social {
+    display: flex;
+    justify-content: center;
+    gap: .35rem;
+    flex-wrap: wrap;
+}
+
+.team-social a {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .78rem;
+    color: #2563eb;
+    background: rgba(37,99,235,.07);
+    border: 1px solid rgba(37,99,235,.12);
+    transition: all .3s ease;
+    text-decoration: none;
+}
+
+.team-social a:hover {
+    background: linear-gradient(135deg, #2563eb, #0ea5e9);
+    color: #fff;
+    border-color: transparent;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37,99,235,.3);
+}
+
+/* ---- "Field Agents" divider label ---- */
+.agents-label {
+    position: relative;
+    margin: 0 0 1.25rem;
+}
+
+.agents-label::before,
+.agents-label::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 36%;
+    height: 1px;
+    background: #b8cedf;
+}
+
+.agents-label::before { left: 0; }
+.agents-label::after  { right: 0; }
+
+.agents-label span {
+    display: inline-block;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #5e87a0;
+    padding: 0 1rem;
+}
+
+/* ---- Compact horizontal agent cards ---- */
+.agent-card {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    background: #fff;
+    border: 1.5px solid #cce0f0;
+    border-radius: 14px;
+    padding: .85rem 1.1rem;
+    height: 100%;
+    transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+}
+
+.agent-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(37,99,235,.1);
+    border-color: rgba(37,99,235,.22);
+}
+
+.agent-avatar {
+    width: 58px; height: 58px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: top center;
+    border: 2px solid rgba(37,99,235,.15);
+    flex-shrink: 0;
+    transition: border-color .3s;
+}
+
+.agent-card:hover .agent-avatar { border-color: rgba(37,99,235,.4); }
+
+.agent-info { flex: 1; min-width: 0; }
+
+.agent-info h5 {
+    font-size: .88rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.agent-info > span {
+    display: block;
+    font-size: .75rem;
+    color: #64748b;
+    margin-bottom: .45rem;
+}
+
+.agent-card .team-social { justify-content: flex-start; }
+
+.agent-avatar-initial {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gradient-brand);
+    color: #fff;
+    font-weight: 800;
+    font-size: 1.1rem;
+}
+
+/* ---- Field agents carousel ---- */
+.agents-carousel {
+    position: relative;
+    padding: 0 2.75rem 2.5rem;
+}
+
+.agents-arrow {
+    position: absolute;
+    top: calc(50% - 1.25rem);
+    transform: translateY(-50%);
+    width: auto;
+    height: auto;
+    opacity: 1;
+    z-index: 5;
+    border: none;
+    background: transparent;
+    padding: 0;
+}
+
+.agents-arrow.carousel-control-prev { left: 0; }
+.agents-arrow.carousel-control-next { right: 0; }
+
+.agents-arrow-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1.5px solid #cce0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2563eb;
+    font-size: .85rem;
+    box-shadow: 0 4px 14px rgba(0,0,0,.08);
+    transition: all .3s ease;
+}
+
+.agents-arrow:hover .agents-arrow-icon {
+    background: var(--gradient-brand);
+    color: #fff;
+    border-color: transparent;
+}
+
+.agents-indicators {
+    position: absolute;
+    bottom: 0;
+    margin-bottom: 0;
+}
+
+.agents-indicators [data-bs-target] {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #b8cedf;
+    border: none;
+    opacity: 1;
+    margin: 0 4px;
+}
+
+.agents-indicators .active {
+    background: #2563eb;
+}
+
+/* ---- Responsive: team section ---- */
+@media (max-width: 767.98px) {
+    .agents-label::before,
+    .agents-label::after { width: 22%; }
+}
+
+/* =============================================
+   MILESTONES / TIMELINE
+   ============================================= */
+.milestones-section {
+    padding: 5rem 0;
+    background: #fff;
+}
+
+.timeline { position: relative; max-width: 900px; margin: 0 auto; }
+
+.timeline::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 50%;
+    width: 4px;
+    background: linear-gradient(180deg, #2563eb 0%, #0ea5e9 100%);
+    transform: translateX(-50%);
+    border-radius: 4px;
+}
+
+.timeline-item {
+    position: relative;
+    width: 50%;
+    padding: .75rem 2.5rem;
+}
+
+/* connector dot */
+.timeline-item::after {
+    content: '';
+    position: absolute;
+    top: 22px;
+    width: 18px; height: 18px;
+    background: #fff;
+    border: 3px solid #2563eb;
+    border-radius: 50%;
+    z-index: 1;
+    transition: all .3s ease;
+    box-shadow: 0 0 0 4px rgba(37,99,235,.1);
+}
+
+.timeline-item:hover::after { background: #2563eb; box-shadow: 0 0 0 6px rgba(37,99,235,.15); }
+
+.timeline-item.left  { left: 0; }
+.timeline-item.right { left: 50%; }
+
+.timeline-item.left::after  { right: -9px; }
+.timeline-item.right::after { left: -9px; }
+
+.timeline-content {
+    background: linear-gradient(145deg, #fff, #f0f6ff);
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 4px 16px rgba(37,99,235,.07);
+    transition: all .3s ease;
+}
+
+.timeline-item:hover .timeline-content {
+    border-color: rgba(37,99,235,.25);
+    box-shadow: 0 8px 28px rgba(37,99,235,.13);
+    transform: translateY(-2px);
+}
+
+.timeline-content h3 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #2563eb, #0ea5e9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: .5rem;
+}
+
+.timeline-content p { color: #475569; font-size: .9rem; margin: 0; line-height: 1.6; }
+
+/* =============================================
+   PARTNERS SECTION
+   ============================================= */
+.partners-section {
+    padding: 4rem 0;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}
+
+.partners-track-wrap {
+    overflow: hidden;
+    width: 100%;
+    mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+
+.partners-track {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    width: max-content;
+    animation: partnersScroll 22s linear infinite;
+}
+
+.partners-track:hover { animation-play-state: paused; }
+
+@keyframes partnersScroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+}
+
+.partner-logo {
+    flex: 0 0 auto;
+    width: 180px;
+    height: 130px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: #fff;
+    border-radius: 14px;
+    border: 1.5px solid #e2e8f0;
+    opacity: .7;
+    transition: all .3s ease;
+}
+
+.partner-logo img { width: 100%; height: 100%; object-fit: contain; border-radius: 6px; }
+
+.partner-logo:hover {
+    opacity: 1;
+    transform: scale(1.04) translateY(-3px);
+    box-shadow: 0 8px 28px rgba(37,99,235,.12);
+    border-color: rgba(37,99,235,.25);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .partners-track { animation: none; }
+}
+
+/* =============================================
+   RESPONSIVE
+   ============================================= */
+@media (max-width: 991px) {
+    .page-header { padding: 130px 0 60px; }
+}
+
+@media (max-width: 767px) {
+    .page-header h1 { font-size: 2rem; }
+
+    .timeline::after { left: 24px; }
+
+    .timeline-item {
+        width: 100%;
+        padding-left: 58px;
+        padding-right: 1rem;
+    }
+
+    .timeline-item.left::after,
+    .timeline-item.right::after { left: 14px; right: auto; }
+
+    .timeline-item.right { left: 0; }
+}
