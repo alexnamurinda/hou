@@ -56,14 +56,15 @@ $activePage = 'home';
                                                     <div class="hd-pkg-price">Support</div>
                                                     <span class="hd-pkg-tag hd-tag-green">Protection</span>
                                                 </div>
-                                                <a href="pages/contact.php" class="hd-join-wa">
-                                                    <i class="fab fa-whatsapp"></i>
-                                                    Become a Member
-                                                </a>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="hero-cta">
+                                <a href="pages/contact.php" class="hd-join-wa">
+                                    Become a Member
+                                </a>
                             </div>
                         </div>
                     </div>

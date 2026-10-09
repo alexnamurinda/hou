@@ -10,11 +10,15 @@ $activePage = $activePage ?? '';
             <img src="<?= $basePath ?>images/hou_logo.png" class="logo-img" alt="HOU_Logo">
             <span class="brand-wordmark">Hotspot Operators Union</span>
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
+        <div class="offcanvas offcanvas-lg offcanvas-end navbar-offcanvas" tabindex="-1" id="navbarNav" aria-label="Navigation">
+            <div class="offcanvas-header justify-content-end">
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close menu"></button>
+            </div>
+            <div class="offcanvas-body">
+                <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
                     <a class="nav-link <?= $activePage === 'home' ? 'active' : '' ?>" href="<?= $basePath ?>index.php">Home</a>
                 </li>
@@ -27,7 +31,8 @@ $activePage = $activePage ?? '';
                 <li class="nav-item">
                     <a class="btn btn-primary nav-join-btn" href="<?= $basePath ?>pages/contact.php">JOIN AS MEMBER</a>
                 </li>
-            </ul>
+                </ul>
+            </div>
         </div>
     </div>
 </nav>
