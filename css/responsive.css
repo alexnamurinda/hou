@@ -18,12 +18,14 @@
 @media (max-width: 991.98px) {
     .hero-section {
         height: 100vh;
-        min-height: 100vh;
+        height: 100svh;
+        min-height: 100svh;
     }
 
     .hero-designed-slide,
     .hero-design-overlay {
-        min-height: 100vh;
+        height: 100%;
+        min-height: 0;
     }
 
     .hero-design-overlay {
@@ -228,4 +230,51 @@
     #ai-chat-toggle { width: 46px !important; height: 46px !important; font-size: 1.15rem !important; }
 
     .back-to-top { width: 40px; height: 40px; }
+}
+
+@media (max-width: 767.98px) and (max-height: 650px) {
+    .hero-design-overlay {
+        padding-top: 4rem;
+        padding-bottom: 4.5rem;
+    }
+
+    .hd-title {
+        font-size: 1.5rem;
+        line-height: 1.12;
+        margin-bottom: .65rem;
+    }
+
+    .hd-sub {
+        font-size: .85rem;
+        margin-bottom: .85rem;
+        line-height: 1.35;
+    }
+
+    .hd-wifi-badge {
+        margin-bottom: .85rem;
+    }
+
+    .hd-pkg-row {
+        flex-wrap: nowrap;
+        gap: .35rem;
+    }
+
+    .hd-pkg {
+        min-width: 0;
+        flex: 1;
+        padding: .45rem .25rem .5rem;
+    }
+
+    .hd-pkg-price {
+        font-size: .75rem;
+    }
+
+    .hd-pkg-tag {
+        padding-right: .4rem;
+        padding-left: .4rem;
+    }
+
+    .hero-cta {
+        bottom: .75rem;
+    }
 }
