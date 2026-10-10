@@ -573,10 +573,6 @@ a {
   margin: clamp(44px, 9vh, 92px) auto 0;
 }
 
-.portal-content > .eyebrow {
-  color: var(--hou-blue);
-}
-
 .portal-content > h1 {
   margin: 12px 0 8px;
   color: var(--hou-navy);

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/api/helpers.php';
+require_once __DIR__ . '/../helpers.php';
 require_method('POST');
 require_csrf_token();
 
@@ -19,5 +19,5 @@ if (ini_get('session.use_cookies')) {
 }
 session_destroy();
 
-header('Location: index.html#login', true, 303);
+header('Location: ../../index.html#login', true, 303);
 exit;

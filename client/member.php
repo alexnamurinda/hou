@@ -28,16 +28,15 @@ header('X-Content-Type-Options: nosniff');
         <img src="../images/hou_logo.png" alt="" />
         <span>Hotspot Operators Union</span>
       </a>
-      <form action="logout.php" method="post">
+      <form action="api/auth/logout.php" method="post">
         <input type="hidden" name="csrf_token" value="<?= escape_html($csrfToken) ?>" />
         <button class="portal-logout" type="submit"><i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i> Log out</button>
       </form>
     </header>
 
     <section class="portal-content" aria-labelledby="portal-heading">
-      <span class="eyebrow">HOU MEMBER PORTAL</span>
       <h1 id="portal-heading">Welcome, <?= escape_html($member['full_name']) ?>!</h1>
-      <p class="portal-intro">Your HOU membership account is active.</p>
+      <p class="portal-intro">Your HOU membership account is active. Thank you!</p>
 
       <div class="portal-card">
         <div class="portal-card-heading">

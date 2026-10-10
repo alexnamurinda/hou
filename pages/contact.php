@@ -48,7 +48,7 @@ $activePage = 'contact';
                             <div class="call-badge-inner">
                                 <i class="fas fa-headset"></i>
                                 <span class="call-badge-247">24/7</span>
-                                <span class="call-badge-support">SUPPORT</span>
+                                <span class="call-badge-support">Available</span>
                             </div>
                         </div>
                         <h3>Call Us</h3>
