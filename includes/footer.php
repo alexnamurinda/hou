@@ -30,10 +30,10 @@
                 <div class="footer-links">
                     <h4>Our Services</h4>
                     <ul>
-                        <li><a href="<?= $basePath ?>pages/about.php">Membership Support</a></li>
-                        <li><a href="<?= $basePath ?>pages/contact.php">Advocacy</a></li>
-                        <li><a href="<?= $basePath ?>pages/contact.php">Training &amp; Capacity Building</a></li>
-                        <li><a href="<?= $basePath ?>pages/contact.php">Compliance Guidance</a></li>
+                        <li>Membership Support</li>
+                        <li>Advocacy</li>
+                        <li>Training &amp; Capacity Building</li>
+                        <li>Compliance Guidance</li>
                     </ul>
                 </div>
             </div>
