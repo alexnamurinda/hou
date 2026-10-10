@@ -8,6 +8,8 @@ $expiry   = $_GET['expiry'] ?? null;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link rel="icon" type="image/png" href="images/hou_logo.png?v=<?php echo filemtime(__DIR__ . '/images/hou_logo.png'); ?>">
+    <link rel="apple-touch-icon" href="images/hou_logo.png?v=<?php echo filemtime(__DIR__ . '/images/hou_logo.png'); ?>">
     <title>Thank You - Hotspot Operators Union</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
