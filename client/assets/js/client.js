@@ -14,6 +14,7 @@
   const signupProgress = document.querySelector('[data-signup-progress]');
   const signupPassword = document.getElementById('signup-password');
   const signupPasswordConfirm = document.getElementById('signup-password-confirm');
+  const loginForm = document.querySelector('[data-login-form]');
 
   function setSignupStep(stepNumber) {
     signupSteps.forEach((step) => {
@@ -58,6 +59,30 @@
   window.addEventListener('hashchange', syncPanelToHash);
   syncPanelToHash();
 
+  async function initializeMemberServices() {
+    try {
+      const response = await fetch('api/auth/csrf.php', {
+        credentials: 'same-origin',
+        cache: 'no-store',
+        headers: { Accept: 'application/json' },
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success || !result.csrf_token) {
+        throw new Error(result.message || 'Could not connect to HOU member services.');
+      }
+    } catch (error) {
+      if (feedback) {
+        feedback.textContent = error instanceof Error
+          ? error.message
+          : 'Could not connect to HOU member services. Please try again.';
+        feedback.hidden = false;
+      }
+      console.error('Failed to initialize HOU member services.', error);
+    }
+  }
+
+  initializeMemberServices();
+
   document.querySelector('[data-signup-next]')?.addEventListener('click', () => {
     const firstStep = signupSteps.find((step) => step.dataset.signupStep === '1');
     const invalidInput = firstStep && [...firstStep.querySelectorAll('input')].find((input) => !input.checkValidity());
@@ -76,21 +101,82 @@
     document.getElementById('signup-email')?.focus();
   });
 
-  document.querySelectorAll('[data-member-form]').forEach((form) => {
-    form.addEventListener('submit', (event) => {
-      event.preventDefault();
-      if (!feedback) return;
+  async function submitAuthForm(form, endpoint, payload) {
+    if (!feedback) return;
+    const submitButton = form.querySelector('[type="submit"]');
+    feedback.hidden = true;
+    if (submitButton) submitButton.disabled = true;
 
-      if (form === signupForm && signupPassword?.value !== signupPasswordConfirm?.value) {
-        feedback.textContent = 'The passwords do not match. Please re-enter the same password.';
-        feedback.hidden = false;
-        signupPasswordConfirm?.focus();
-        return;
+    try {
+      const csrfResponse = await fetch('api/auth/csrf.php', {
+        credentials: 'same-origin',
+        cache: 'no-store',
+        headers: { Accept: 'application/json' },
+      });
+      const csrfData = await csrfResponse.json();
+      if (!csrfResponse.ok || !csrfData.success || !csrfData.csrf_token) {
+        throw new Error(csrfData.message || 'Could not start a secure session. Please refresh and try again.');
       }
 
-      feedback.textContent = 'HOU member accounts are not available online yet. Please contact the Union using the link above.';
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        credentials: 'same-origin',
+        cache: 'no-store',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfData.csrf_token,
+        },
+        body: JSON.stringify(payload()),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'Unable to complete your request. Please try again.');
+      }
+
+      window.location.assign('member.php');
+    } catch (error) {
+      feedback.textContent = error instanceof Error
+        ? error.message
+        : 'Unable to connect to HOU member services. Please try again.';
       feedback.hidden = false;
-    });
+      if (!(error instanceof Error && error.message)) {
+        console.error('HOU account request failed.', error);
+      }
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
+    }
+  }
+
+  loginForm?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    submitAuthForm(loginForm, 'api/auth/login.php', () => ({
+      phone: document.getElementById('login-identifier').value,
+      password: document.getElementById('login-password').value,
+    }));
+  });
+
+  signupForm?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (signupPassword?.value !== signupPasswordConfirm?.value) {
+      if (feedback) {
+        feedback.textContent = 'The passwords do not match. Please re-enter the same password.';
+        feedback.hidden = false;
+      }
+      signupPasswordConfirm?.focus();
+      return;
+    }
+
+    submitAuthForm(signupForm, 'api/auth/register.php', () => ({
+      name: document.getElementById('signup-name').value,
+      area_of_operation: document.getElementById('signup-area').value,
+      phone: document.getElementById('signup-phone').value,
+      email: document.getElementById('signup-email').value,
+      password: signupPassword.value,
+      password_confirmation: signupPasswordConfirm.value,
+    }));
   });
 
   async function removePortalCaching() {

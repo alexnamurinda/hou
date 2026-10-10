@@ -64,7 +64,7 @@ $activePage = 'home';
                                 </div>
                             </div>
                             <div class="hero-cta">
-                                <a href="client/index.html?v=20261010-2#signup" class="hd-join-wa">
+                                <a href="client/index.html?v=20261010-11#signup" class="hd-join-wa">
                                     Become a Member
                                 </a>
                             </div>

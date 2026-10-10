@@ -1,88 +1,69 @@
 <?php
-/* POST /client/api/auth/register.php
-   Body: { name, phone, password, email?, referral_code? } */
+declare(strict_types=1);
 
 require_once __DIR__ . '/../helpers.php';
+set_api_headers();
+require_method('POST');
+start_member_session();
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') respond_err('Method not allowed', 405);
+$body = read_json_body();
+require_csrf_token($body);
 
-$body = get_body();
-require_fields($body, ['name', 'phone', 'password']);
+$name = trim((string)($body['name'] ?? ''));
+$area = trim((string)($body['area_of_operation'] ?? ''));
+$phone = normalize_phone((string)($body['phone'] ?? ''));
+$email = strtolower(trim((string)($body['email'] ?? '')));
+$password = (string)($body['password'] ?? '');
+$passwordConfirmation = (string)($body['password_confirmation'] ?? '');
 
-check_rate_limit('reg:' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 10, 3600); // 10 registrations per IP per hour
+$rateKey = auth_attempt_key('register', '');
+enforce_auth_rate_limit($rateKey, 10, 3600);
+record_auth_attempt($rateKey);
 
-$name     = clean($body['name']);
-$phone    = clean($body['phone']);
-$password = $body['password'];
-$email    = isset($body['email']) ? clean($body['email']) : null;
-$ref_code = isset($body['referral_code']) ? strtoupper(clean($body['referral_code'])) : null;
-
-if (strlen($password) < 8) {
-    respond_err('Password must be at least 8 characters');
+if ($name === '' || mb_strlen($name) > 150) {
+    respond_json(422, ['success' => false, 'message' => 'Enter your full name (up to 150 characters).']);
+}
+if ($area === '' || mb_strlen($area) > 180) {
+    respond_json(422, ['success' => false, 'message' => 'Enter your area of operation (up to 180 characters).']);
+}
+if ($phone === null) {
+    respond_json(422, ['success' => false, 'message' => 'Enter a valid phone number, including its country code.']);
+}
+if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 254) {
+    respond_json(422, ['success' => false, 'message' => 'Enter a valid email address.']);
+}
+if (strlen($password) < 8 || strlen($password) > 4096) {
+    respond_json(422, ['success' => false, 'message' => 'Your password must be at least 8 characters.']);
+}
+if (!hash_equals($password, $passwordConfirmation)) {
+    respond_json(422, ['success' => false, 'message' => 'The passwords do not match. Please re-enter the same password.']);
 }
 
 $pdo = db_connect();
-
-// Check phone uniqueness
-$chk = $pdo->prepare("SELECT id FROM users WHERE phone = ? LIMIT 1");
-$chk->execute([$phone]);
-if ($chk->fetch()) respond_err('Phone number already registered');
-
-// Check email uniqueness if provided
-if ($email) {
-    $chk2 = $pdo->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
-    $chk2->execute([$email]);
-    if ($chk2->fetch()) respond_err('Email already in use');
+$existing = $pdo->prepare('SELECT phone, email FROM members WHERE phone = ? OR email = ? LIMIT 1');
+$existing->execute([$phone, $email]);
+$duplicate = $existing->fetch();
+if ($duplicate) {
+    $message = $duplicate['phone'] === $phone
+        ? 'This phone number is already registered. Try logging in instead.'
+        : 'This email address is already registered. Try logging in instead.';
+    respond_json(409, ['success' => false, 'message' => $message]);
 }
 
-// Resolve referral
-$referred_by = null;
-if ($ref_code) {
-    $r = $pdo->prepare("SELECT id FROM users WHERE referral_code = ? LIMIT 1");
-    $r->execute([$ref_code]);
-    $row = $r->fetch();
-    if ($row) $referred_by = $row['id'];
+try {
+    $insert = $pdo->prepare(
+        'INSERT INTO members (full_name, area_of_operation, phone, email, password_hash) VALUES (?, ?, ?, ?, ?)'
+    );
+    $insert->execute([$name, $area, $phone, $email, password_hash($password, PASSWORD_DEFAULT)]);
+} catch (PDOException $error) {
+    if ($error->getCode() === '23000') {
+        respond_json(409, ['success' => false, 'message' => 'An account already exists with those details. Try logging in instead.']);
+    }
+    throw $error;
 }
 
-// Generate unique referral code for new user
-do {
-    $my_ref = strtoupper(substr($name, 0, 3)) . strtoupper(bin2hex(random_bytes(3)));
-    $dup = $pdo->prepare("SELECT id FROM users WHERE referral_code = ? LIMIT 1");
-    $dup->execute([$my_ref]);
-} while ($dup->fetch());
+session_regenerate_id(true);
+$_SESSION['member_id'] = (int)$pdo->lastInsertId();
+$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
-$hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
-
-$ins = $pdo->prepare("
-    INSERT INTO users (name, phone, email, password_hash, referral_code, referred_by)
-    VALUES (?, ?, ?, ?, ?, ?)
-");
-$ins->execute([$name, $phone, $email, $hash, $my_ref, $referred_by]);
-$user_id = (int)$pdo->lastInsertId();
-
-// Create session token
-$token      = generate_token();
-$expires_at = date('Y-m-d H:i:s', time() + TOKEN_EXPIRY);
-$pdo->prepare("
-    INSERT INTO sessions (actor_id, actor_type, token, expires_at) VALUES (?, 'user', ?, ?)
-")->execute([$user_id, hash_token($token), $expires_at]);
-
-// Add welcome wallet credit
-if ($referred_by) {
-    $pdo->prepare("UPDATE users SET wallet_balance = wallet_balance + 5000 WHERE id = ?")->execute([$user_id]);
-    $pdo->prepare("UPDATE users SET wallet_balance = wallet_balance + 5000 WHERE id = ?")->execute([$referred_by]);
-}
-
-respond_ok('Account created successfully', [
-    'token'      => $token,
-    'expires_at' => $expires_at,
-    'user'       => [
-        'id'             => $user_id,
-        'name'           => $name,
-        'phone'          => $phone,
-        'email'          => $email,
-        'referral_code'  => $my_ref,
-        'wallet_balance' => $referred_by ? 5000.00 : 0.00,
-        'rating'         => 5.00,
-    ],
-]);
+respond_json(201, ['success' => true, 'message' => 'Your HOU member account has been created.']);

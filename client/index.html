@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" href="../images/hou_logo.png?v=20261010-1" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/client.css?v=20261010-7" />
+  <link rel="stylesheet" href="assets/css/client.css?v=20261010-11" />
 </head>
 <body>
   <main class="member-app">
@@ -50,7 +50,7 @@
             <p>Sign in to your HOU member account</p>
           </div>
 
-          <form class="auth-form" data-member-form>
+          <form class="auth-form" data-login-form>
             <label for="login-identifier">Phone number</label>
             <div class="input-wrap">
               <i class="fa-solid fa-phone"></i>
@@ -83,12 +83,7 @@
         <section id="signup-panel" class="auth-panel" aria-labelledby="signup-heading" hidden>
           <div class="auth-heading">
             <h2 id="signup-heading">Become a Member</h2>
-            <p>Tell us about yourself and your hotspot business.</p>
-          </div>
-
-          <div class="account-notice" role="status">
-            <i class="fa-solid fa-circle-info"></i>
-            <span>Online registration is being set up. <a href="../pages/contact.php">Contact HOU</a> to start your membership.</span>
+            <p>Tell us about yourself and where you operate.</p>
           </div>
 
           <div class="signup-progress" aria-live="polite">
@@ -101,13 +96,13 @@
               <label for="signup-name">Full name</label>
               <div class="input-wrap">
                 <i class="fa-solid fa-user"></i>
-                <input id="signup-name" name="name" type="text" autocomplete="name" placeholder="Your full name" required />
+                <input id="signup-name" name="name" type="text" autocomplete="name" placeholder="enter your full name" required />
               </div>
 
-              <label for="signup-business">Business or network name</label>
+              <label for="signup-area">Area of operation</label>
               <div class="input-wrap">
-                <i class="fa-solid fa-building"></i>
-                <input id="signup-business" name="business" type="text" autocomplete="organization" placeholder="Your hotspot or network" required />
+                <i class="fa-solid fa-location-dot"></i>
+                <input id="signup-area" name="area_of_operation" type="text" placeholder="enter your area of operation" required />
               </div>
 
               <label for="signup-phone">Phone number</label>
@@ -155,6 +150,6 @@
       </section>
     </div>
   </main>
-  <script src="assets/js/client.js?v=20261010-7"></script>
+  <script src="assets/js/client.js?v=20261010-11"></script>
 </body>
 </html>

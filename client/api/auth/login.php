@@ -1,55 +1,39 @@
 <?php
-/* POST /client/api/auth/login.php
-   Body: { phone, password } */
+declare(strict_types=1);
 
 require_once __DIR__ . '/../helpers.php';
+set_api_headers();
+require_method('POST');
+start_member_session();
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') respond_err('Method not allowed', 405);
+$body = read_json_body();
+require_csrf_token($body);
 
-$body = get_body();
-require_fields($body, ['phone', 'password']);
-
-$phone    = clean($body['phone']);
-$password = $body['password'];
-
-check_rate_limit('login:' . $phone, 5, 900); // 5 attempts per 15 min per phone number
+$rawPhone = trim((string)($body['phone'] ?? ''));
+$phone = normalize_phone($rawPhone);
+$password = (string)($body['password'] ?? '');
+$rateIdentity = $phone ?? preg_replace('/\D/', '', $rawPhone);
+$rateKey = auth_attempt_key('login', $rateIdentity);
+enforce_auth_rate_limit($rateKey, 10, 900);
 
 $pdo = db_connect();
-
-$stmt = $pdo->prepare("SELECT * FROM users WHERE phone = ? LIMIT 1");
-$stmt->execute([$phone]);
-$user = $stmt->fetch();
-
-if (!$user || !password_verify($password, $user['password_hash'])) {
-    respond_err('Invalid phone number or password', 401);
-}
-if ($user['status'] === 'suspended') {
-    respond_err('Account suspended — contact support', 403);
+$member = null;
+if ($phone !== null && $password !== '') {
+    $query = $pdo->prepare('SELECT id, password_hash, status FROM members WHERE phone = ? LIMIT 1');
+    $query->execute([$phone]);
+    $member = $query->fetch();
 }
 
-// Invalidate any expired sessions for this user
-$pdo->prepare("
-    DELETE FROM sessions WHERE actor_id = ? AND actor_type = 'user' AND expires_at < NOW()
-")->execute([$user['id']]);
+if (!$member || !password_verify($password, $member['password_hash'])) {
+    record_auth_attempt($rateKey);
+    respond_json(401, ['success' => false, 'message' => 'Invalid phone number or password.']);
+}
+if ($member['status'] !== 'active') {
+    respond_json(403, ['success' => false, 'message' => 'This account is not active. Please contact HOU.']);
+}
 
-// Create fresh session
-$token      = generate_token();
-$expires_at = date('Y-m-d H:i:s', time() + TOKEN_EXPIRY);
-$pdo->prepare("
-    INSERT INTO sessions (actor_id, actor_type, token, expires_at) VALUES (?, 'user', ?, ?)
-")->execute([$user['id'], hash_token($token), $expires_at]);
+session_regenerate_id(true);
+$_SESSION['member_id'] = (int)$member['id'];
+$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
-respond_ok('Login successful', [
-    'token'      => $token,
-    'expires_at' => $expires_at,
-    'user'       => [
-        'id'             => $user['id'],
-        'name'           => $user['name'],
-        'phone'          => $user['phone'],
-        'email'          => $user['email'],
-        'profile_photo'  => $user['profile_photo'],
-        'wallet_balance' => (float)$user['wallet_balance'],
-        'rating'         => (float)$user['rating'],
-        'referral_code'  => $user['referral_code'],
-    ],
-]);
+respond_json(200, ['success' => true, 'message' => 'Signed in successfully.']);
