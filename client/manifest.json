@@ -1,0 +1,37 @@
+﻿{
+  "name": "HOU Member Portal",
+  "short_name": "HOU Members",
+  "description": "Hotspot Operators Union member access and registration",
+  "start_url": "./index.html?v=20261010-2",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f172a",
+  "lang": "en",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "../images/hou_logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Log In",
+      "short_name": "Log In",
+      "description": "Log in to your HOU member account",
+      "url": "./index.html#login",
+      "icons": [{ "src": "../images/hou_logo.png", "sizes": "any" }]
+    },
+    {
+      "name": "Sign Up",
+      "short_name": "Sign Up",
+      "description": "Join the Hotspot Operators Union",
+      "url": "./index.html#signup",
+      "icons": [{ "src": "../images/hou_logo.png", "sizes": "any" }]
+    }
+  ]
+}
