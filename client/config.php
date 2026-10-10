@@ -12,7 +12,7 @@ function db_connect(): PDO
     $host = getenv('HOU_DB_HOST') ?: '127.0.0.1';
     $port = getenv('HOU_DB_PORT') ?: '3306';
     $name = getenv('HOU_DB_NAME') ?: 'HOU';
-    $user = getenv('HOU_DB_USER') ?: 'root';
+    $user = getenv('HOU_DB_USER') ?: 'hou_user';
     $password = getenv('HOU_DB_PASSWORD');
     $password = $password === false ? '' : $password;
 
