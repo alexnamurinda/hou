@@ -252,24 +252,11 @@ if (myCarousel) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    const navLinks = document.querySelectorAll('.nav-link');
-    const navbarCollapse = document.getElementById('navbarNav');
-    const bsCollapse = new bootstrap.Collapse(navbarCollapse, { toggle: false });
+    const navbarOffcanvas = document.getElementById('navbarNav');
+    if (!navbarOffcanvas) return;
 
-    // Collapse on nav-link click
-    navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            if (navbarCollapse.classList.contains('show')) {
-                bsCollapse.hide();
-            }
-        });
-    });
-
-    // Collapse when clicking outside navbar
-    document.addEventListener('click', function (event) {
-        const isClickInside = navbarCollapse.contains(event.target) || event.target.classList.contains('navbar-toggler');
-        if (!isClickInside && navbarCollapse.classList.contains('show')) {
-            bsCollapse.hide();
-        }
+    const offcanvas = bootstrap.Offcanvas.getOrCreateInstance(navbarOffcanvas);
+    navbarOffcanvas.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => offcanvas.hide());
     });
 });
