@@ -28,8 +28,11 @@ $activePage = $activePage ?? '';
                 <li class="nav-item">
                     <a class="nav-link <?= $activePage === 'contact' ? 'active' : '' ?>" href="<?= $basePath ?>pages/contact.php">Contact Us</a>
                 </li>
+                <li class="nav-item nav-login-item">
+                    <a class="nav-link" href="<?= $basePath ?>client/index.html?v=20261010-11#login">Log in</a>
+                </li>
                 <li class="nav-item">
-                    <a class="btn btn-primary nav-join-btn" href="<?= $basePath ?>client/index.html?v=20261010-11#signup">JOIN AS MEMBER</a>
+                    <a class="btn nav-join-btn" href="<?= $basePath ?>client/index.html?v=20261010-11#signup">JOIN US NOW</a>
                 </li>
                 </ul>
             </div>

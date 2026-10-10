@@ -228,7 +228,8 @@ a {
 }
 
 .nav-join-btn {
-    margin-left: .75rem;
+    display: inline-flex;
+    margin-left: 0;
     padding: .6rem 1rem;
     font-size: .8rem;
     font-weight: 700;
@@ -238,6 +239,10 @@ a {
     color: var(--black);
     box-shadow: none;
     transition: var(--transition);
+}
+
+.nav-login-item {
+    margin-left: 1.5rem;
 }
 
 .nav-join-btn:hover,

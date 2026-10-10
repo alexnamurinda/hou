@@ -82,6 +82,14 @@
         text-align: center;
     }
 
+    .navbar-offcanvas .navbar-nav {
+        gap: 0;
+    }
+
+    .navbar-offcanvas .nav-login-item {
+        margin: 1rem 0 0;
+    }
+
     .navbar-nav .nav-link::after { display: none; }
 
     .navbar-nav .nav-link.active,
@@ -136,7 +144,7 @@
     .navbar-offcanvas .nav-join-btn {
         display: inline-block;
         width: auto;
-        margin: .75rem auto 0;
+        margin: .25rem auto 0;
     }
 
     .hero-flier-img { height: 72vh; min-height: 380px; }
