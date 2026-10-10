@@ -12,8 +12,8 @@ function db_connect(): PDO
     $host = getenv('HOU_DB_HOST') ?: '127.0.0.1';
     $port = getenv('HOU_DB_PORT') ?: '3306';
     $name = getenv('HOU_DB_NAME') ?: 'HOU';
-    $user = getenv('HOU_DB_USER') ?: 'hou_user';
-    $password = getenv('Hou@user321');
+    $user = getenv('HOU_DB_USER') ?: 'root';
+    $password = getenv('HOU_DB_PASSWORD');
     $password = $password === false ? '' : $password;
 
     $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4', $host, $port, $name);
