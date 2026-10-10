@@ -27,3 +27,16 @@ CREATE TABLE IF NOT EXISTS auth_attempts (
   KEY idx_auth_attempts_key_time (attempt_key, attempted_at),
   KEY idx_auth_attempts_time (attempted_at)
 ) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS member_announcements (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  title VARCHAR(180) NOT NULL,
+  body TEXT NOT NULL,
+  category ENUM('general', 'event', 'important', 'maintenance') NOT NULL DEFAULT 'general',
+  status ENUM('draft', 'published') NOT NULL DEFAULT 'draft',
+  published_at TIMESTAMP NULL DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_member_announcements_visibility (status, published_at)
+) ENGINE=InnoDB;

@@ -101,7 +101,9 @@
     document.getElementById('signup-email')?.focus();
   });
 
-  async function submitAuthForm(form, endpoint, payload) {
+  async function submitAuthForm(form, endpoint, payload, onSuccess = () => {
+    window.location.assign('member.php');
+  }) {
     if (!feedback) return;
     const submitButton = form.querySelector('[type="submit"]');
     feedback.hidden = true;
@@ -134,7 +136,7 @@
         throw new Error(result.message || 'Unable to complete your request. Please try again.');
       }
 
-      window.location.assign('member.php');
+      onSuccess(result);
     } catch (error) {
       feedback.textContent = error instanceof Error
         ? error.message
@@ -169,14 +171,26 @@
       return;
     }
 
-    submitAuthForm(signupForm, 'api/auth/register.php', () => ({
-      name: document.getElementById('signup-name').value,
-      area_of_operation: document.getElementById('signup-area').value,
-      phone: document.getElementById('signup-phone').value,
-      email: document.getElementById('signup-email').value,
-      password: signupPassword.value,
-      password_confirmation: signupPasswordConfirm.value,
-    }));
+    submitAuthForm(
+      signupForm,
+      'api/auth/register.php',
+      () => ({
+        name: document.getElementById('signup-name').value,
+        area_of_operation: document.getElementById('signup-area').value,
+        phone: document.getElementById('signup-phone').value,
+        email: document.getElementById('signup-email').value,
+        password: signupPassword.value,
+        password_confirmation: signupPasswordConfirm.value,
+      }),
+      (result) => {
+        showPanel('login');
+        window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#login`);
+        document.getElementById('login-identifier').value = document.getElementById('signup-phone').value;
+        feedback.textContent = result.message || 'Your account has been created. Please log in now.';
+        feedback.hidden = false;
+        document.getElementById('login-identifier').focus();
+      }
+    );
   });
 
   async function removePortalCaching() {

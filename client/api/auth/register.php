@@ -62,8 +62,4 @@ try {
     throw $error;
 }
 
-session_regenerate_id(true);
-$_SESSION['member_id'] = (int)$pdo->lastInsertId();
-$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-
-respond_json(201, ['success' => true, 'message' => 'Your HOU member account has been created.']);
+respond_json(201, ['success' => true, 'message' => 'Your HOU member account has been created. Please log in now.']);
