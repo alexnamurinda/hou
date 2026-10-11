@@ -16,6 +16,26 @@
   const signupPasswordConfirm = document.getElementById('signup-password-confirm');
   const signupOtp = document.getElementById('signup-otp');
   const loginForm = document.querySelector('[data-login-form]');
+  let feedbackTimeout;
+
+  function hideFeedback() {
+    if (!feedback) return;
+    window.clearTimeout(feedbackTimeout);
+    feedback.hidden = true;
+    feedback.textContent = '';
+    feedback.classList.remove('is-success');
+    feedback.setAttribute('role', 'alert');
+  }
+
+  function showFeedback(message, type = 'error') {
+    if (!feedback) return;
+    window.clearTimeout(feedbackTimeout);
+    feedback.textContent = message;
+    feedback.hidden = false;
+    feedback.classList.toggle('is-success', type === 'success');
+    feedback.setAttribute('role', type === 'success' ? 'status' : 'alert');
+    feedbackTimeout = window.setTimeout(hideFeedback, 5000);
+  }
 
   function setSignupStep(stepNumber) {
     signupSteps.forEach((step) => {
@@ -28,10 +48,7 @@
 
     if (signupStepLabel) signupStepLabel.textContent = `Step ${stepNumber} of 3`;
     if (signupProgress) signupProgress.style.width = `${Math.round((stepNumber / 3) * 100)}%`;
-    if (feedback) {
-      feedback.hidden = true;
-      feedback.textContent = '';
-    }
+    hideFeedback();
   }
 
   function showPanel(name) {
@@ -47,10 +64,7 @@
     memberLayout.dataset.authView = activeName;
 
     if (activeName === 'signup') setSignupStep(1);
-    if (feedback) {
-      feedback.hidden = true;
-      feedback.textContent = '';
-    }
+    hideFeedback();
   }
 
   function syncPanelToHash() {
@@ -73,10 +87,9 @@
       }
     } catch (error) {
       if (feedback) {
-        feedback.textContent = error instanceof Error
+        showFeedback(error instanceof Error
           ? error.message
-          : 'Could not connect to HOU member services. Please try again.';
-        feedback.hidden = false;
+          : 'Could not connect to HOU member services. Please try again.');
       }
       console.error('Failed to initialize HOU member services.', error);
     }
@@ -116,7 +129,7 @@
   async function requestSignupCode(button = document.querySelector('[data-signup-next]')) {
     if (!feedback || !button) return;
     button.disabled = true;
-    feedback.hidden = true;
+    hideFeedback();
 
     try {
       const result = await postMemberRequest('api/auth/send-signup-otp.php', {
@@ -126,14 +139,12 @@
       });
       document.querySelector('[data-signup-email]').textContent = document.getElementById('signup-email').value;
       setSignupStep(2);
-      feedback.textContent = result.message;
-      feedback.hidden = false;
+      showFeedback(result.message, 'success');
       signupOtp?.focus();
     } catch (error) {
-      feedback.textContent = error instanceof Error
+      showFeedback(error instanceof Error
         ? error.message
-        : 'Unable to send a verification code. Please try again.';
-      feedback.hidden = false;
+        : 'Unable to send a verification code. Please try again.');
     } finally {
       button.disabled = false;
     }
@@ -166,18 +177,16 @@
 
     const button = document.querySelector('[data-signup-verify]');
     button.disabled = true;
-    feedback.hidden = true;
+    hideFeedback();
     try {
       const result = await postMemberRequest('api/auth/verify-signup-otp.php', { otp: signupOtp.value });
       setSignupStep(3);
-      feedback.textContent = result.message;
-      feedback.hidden = false;
+      showFeedback(result.message, 'success');
       signupPassword?.focus();
     } catch (error) {
-      feedback.textContent = error instanceof Error
+      showFeedback(error instanceof Error
         ? error.message
-        : 'Unable to verify the code. Please try again.';
-      feedback.hidden = false;
+        : 'Unable to verify the code. Please try again.');
     } finally {
       button.disabled = false;
     }
@@ -197,17 +206,16 @@
   }) {
     if (!feedback) return;
     const submitButton = form.querySelector('[type="submit"]');
-    feedback.hidden = true;
+    hideFeedback();
     if (submitButton) submitButton.disabled = true;
 
     try {
       const result = await postMemberRequest(endpoint, payload());
       onSuccess(result);
     } catch (error) {
-      feedback.textContent = error instanceof Error
+      showFeedback(error instanceof Error
         ? error.message
-        : 'Unable to connect to HOU member services. Please try again.';
-      feedback.hidden = false;
+        : 'Unable to connect to HOU member services. Please try again.');
       if (!(error instanceof Error && error.message)) {
         console.error('HOU account request failed.', error);
       }
@@ -232,10 +240,7 @@
     if (activeStep?.dataset.signupStep !== '3') return;
 
     if (signupPassword?.value !== signupPasswordConfirm?.value) {
-      if (feedback) {
-        feedback.textContent = 'The passwords do not match. Please re-enter the same password.';
-        feedback.hidden = false;
-      }
+      showFeedback('The passwords do not match. Please re-enter the same password.');
       signupPasswordConfirm?.focus();
       return;
     }
@@ -251,8 +256,7 @@
         showPanel('login');
         window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#login`);
         document.getElementById('login-identifier').value = document.getElementById('signup-phone').value;
-        feedback.textContent = result.message || 'Your account has been created. Please log in now.';
-        feedback.hidden = false;
+        showFeedback(result.message || 'Your account has been created. Please log in now.', 'success');
         document.getElementById('login-identifier').focus();
       }
     );

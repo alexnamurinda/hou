@@ -520,6 +520,12 @@ a {
   line-height: 1.5;
 }
 
+.form-feedback.is-success {
+  color: #166534;
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
 .back-link {
   display: flex;
   align-items: center;
