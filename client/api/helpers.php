@@ -107,6 +107,12 @@ function escape_html(string $value): string
     return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
+function member_first_name(string $fullName): string
+{
+    $parts = preg_split('/\s+/u', trim($fullName), 2);
+    return $parts[0] ?? '';
+}
+
 function require_member(): array
 {
     start_member_session();

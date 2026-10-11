@@ -59,7 +59,7 @@ header('X-Content-Type-Options: nosniff');
       <section class="portal-welcome" aria-labelledby="portal-heading">
         <div>
           <span class="portal-eyebrow"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> MEMBER PORTAL</span>
-          <h1 id="portal-heading">Welcome, <?= escape_html($member['full_name']) ?>!</h1>
+          <h1 id="portal-heading">Welcome, <?= escape_html(member_first_name((string)$member['full_name'])) ?>!</h1>
           <p>Your HOU membership is active. Here’s what’s happening in your community.</p>
         </div>
         <a class="portal-welcome-link" href="#member-updates">View latest updates <i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>
