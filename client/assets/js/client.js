@@ -34,7 +34,7 @@
     feedback.hidden = false;
     feedback.classList.toggle('is-success', type === 'success');
     feedback.setAttribute('role', type === 'success' ? 'status' : 'alert');
-    feedbackTimeout = window.setTimeout(hideFeedback, 5000);
+    feedbackTimeout = window.setTimeout(hideFeedback, 10000);
   }
 
   function setSignupStep(stepNumber) {
@@ -62,6 +62,9 @@
       heading.hidden = heading.dataset.welcomeHeading !== activeName;
     });
     memberLayout.dataset.authView = activeName;
+    if (feedback) {
+      panels[activeName].insertBefore(feedback, panels[activeName].querySelector('.auth-heading'));
+    }
 
     if (activeName === 'signup') setSignupStep(1);
     hideFeedback();
