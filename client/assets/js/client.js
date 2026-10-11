@@ -14,6 +14,7 @@
   const signupProgress = document.querySelector('[data-signup-progress]');
   const signupPassword = document.getElementById('signup-password');
   const signupPasswordConfirm = document.getElementById('signup-password-confirm');
+  const signupOtp = document.getElementById('signup-otp');
   const loginForm = document.querySelector('[data-login-form]');
 
   function setSignupStep(stepNumber) {
@@ -25,8 +26,8 @@
       });
     });
 
-    if (signupStepLabel) signupStepLabel.textContent = `Step ${stepNumber} of 2`;
-    if (signupProgress) signupProgress.style.width = stepNumber === 1 ? '50%' : '100%';
+    if (signupStepLabel) signupStepLabel.textContent = `Step ${stepNumber} of 3`;
+    if (signupProgress) signupProgress.style.width = `${Math.round((stepNumber / 3) * 100)}%`;
     if (feedback) {
       feedback.hidden = true;
       feedback.textContent = '';
@@ -83,6 +84,61 @@
 
   initializeMemberServices();
 
+  async function postMemberRequest(endpoint, payload) {
+    const csrfResponse = await fetch('api/auth/csrf.php', {
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: { Accept: 'application/json' },
+    });
+    const csrfData = await csrfResponse.json();
+    if (!csrfResponse.ok || !csrfData.success || !csrfData.csrf_token) {
+      throw new Error(csrfData.message || 'Could not start a secure session. Please refresh and try again.');
+    }
+
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfData.csrf_token,
+      },
+      body: JSON.stringify(payload),
+    });
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Unable to complete your request. Please try again.');
+    }
+    return result;
+  }
+
+  async function requestSignupCode(button = document.querySelector('[data-signup-next]')) {
+    if (!feedback || !button) return;
+    button.disabled = true;
+    feedback.hidden = true;
+
+    try {
+      const result = await postMemberRequest('api/auth/send-signup-otp.php', {
+        name: document.getElementById('signup-name').value,
+        phone: document.getElementById('signup-phone').value,
+        email: document.getElementById('signup-email').value,
+      });
+      document.querySelector('[data-signup-email]').textContent = document.getElementById('signup-email').value;
+      setSignupStep(2);
+      feedback.textContent = result.message;
+      feedback.hidden = false;
+      signupOtp?.focus();
+    } catch (error) {
+      feedback.textContent = error instanceof Error
+        ? error.message
+        : 'Unable to send a verification code. Please try again.';
+      feedback.hidden = false;
+    } finally {
+      button.disabled = false;
+    }
+  }
+
   document.querySelector('[data-signup-next]')?.addEventListener('click', () => {
     const firstStep = signupSteps.find((step) => step.dataset.signupStep === '1');
     const invalidInput = firstStep && [...firstStep.querySelectorAll('input')].find((input) => !input.checkValidity());
@@ -92,13 +148,48 @@
       return;
     }
 
-    setSignupStep(2);
-    signupPassword?.focus();
+    requestSignupCode();
   });
 
   document.querySelector('[data-signup-back]')?.addEventListener('click', () => {
     setSignupStep(1);
-    document.getElementById('signup-email')?.focus();
+    document.getElementById('signup-name')?.focus();
+  });
+
+  document.querySelector('[data-signup-verify]')?.addEventListener('click', async () => {
+    if (!feedback || !signupOtp) return;
+    if (!signupOtp.checkValidity()) {
+      signupOtp.reportValidity();
+      signupOtp.focus();
+      return;
+    }
+
+    const button = document.querySelector('[data-signup-verify]');
+    button.disabled = true;
+    feedback.hidden = true;
+    try {
+      const result = await postMemberRequest('api/auth/verify-signup-otp.php', { otp: signupOtp.value });
+      setSignupStep(3);
+      feedback.textContent = result.message;
+      feedback.hidden = false;
+      signupPassword?.focus();
+    } catch (error) {
+      feedback.textContent = error instanceof Error
+        ? error.message
+        : 'Unable to verify the code. Please try again.';
+      feedback.hidden = false;
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  document.querySelector('[data-signup-resend]')?.addEventListener('click', (event) => {
+    requestSignupCode(event.currentTarget);
+  });
+
+  document.querySelector('[data-signup-password-back]')?.addEventListener('click', () => {
+    setSignupStep(1);
+    document.getElementById('signup-name')?.focus();
   });
 
   async function submitAuthForm(form, endpoint, payload, onSuccess = () => {
@@ -110,32 +201,7 @@
     if (submitButton) submitButton.disabled = true;
 
     try {
-      const csrfResponse = await fetch('api/auth/csrf.php', {
-        credentials: 'same-origin',
-        cache: 'no-store',
-        headers: { Accept: 'application/json' },
-      });
-      const csrfData = await csrfResponse.json();
-      if (!csrfResponse.ok || !csrfData.success || !csrfData.csrf_token) {
-        throw new Error(csrfData.message || 'Could not start a secure session. Please refresh and try again.');
-      }
-
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        credentials: 'same-origin',
-        cache: 'no-store',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfData.csrf_token,
-        },
-        body: JSON.stringify(payload()),
-      });
-      const result = await response.json();
-      if (!response.ok || !result.success) {
-        throw new Error(result.message || 'Unable to complete your request. Please try again.');
-      }
-
+      const result = await postMemberRequest(endpoint, payload());
       onSuccess(result);
     } catch (error) {
       feedback.textContent = error instanceof Error
@@ -162,6 +228,9 @@
 
   signupForm?.addEventListener('submit', (event) => {
     event.preventDefault();
+    const activeStep = signupForm.querySelector('[data-signup-step]:not([hidden])');
+    if (activeStep?.dataset.signupStep !== '3') return;
+
     if (signupPassword?.value !== signupPasswordConfirm?.value) {
       if (feedback) {
         feedback.textContent = 'The passwords do not match. Please re-enter the same password.';
@@ -175,10 +244,6 @@
       signupForm,
       'api/auth/register.php',
       () => ({
-        name: document.getElementById('signup-name').value,
-        area_of_operation: document.getElementById('signup-area').value,
-        phone: document.getElementById('signup-phone').value,
-        email: document.getElementById('signup-email').value,
         password: signupPassword.value,
         password_confirmation: signupPasswordConfirm.value,
       }),

@@ -302,6 +302,11 @@ a {
   line-height: 1.5;
 }
 
+.signup-step-heading strong {
+  color: var(--hou-navy);
+  overflow-wrap: anywhere;
+}
+
 .signup-step-actions {
   display: flex;
   gap: 10px;
@@ -309,6 +314,32 @@ a {
 
 .signup-step-actions .auth-submit {
   flex: 1;
+}
+
+.signup-resend {
+  justify-self: center;
+  padding: 7px 10px;
+  margin-top: 2px;
+  color: var(--hou-blue);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.signup-resend:hover,
+.signup-resend:focus-visible {
+  color: var(--hou-navy);
+  text-decoration: underline;
+}
+
+.auth-submit:disabled,
+.auth-secondary:disabled,
+.signup-resend:disabled {
+  opacity: .65;
+  cursor: wait;
 }
 
 .auth-secondary {

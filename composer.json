@@ -1,0 +1,9 @@
+{
+  "require": {
+    "php": "^8.2",
+    "ext-mbstring": "*",
+    "ext-openssl": "*",
+    "ext-pdo_mysql": "*",
+    "phpmailer/phpmailer": "^6.10"
+  }
+}

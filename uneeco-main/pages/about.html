@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us | Uneeco Uganda</title>
+    <meta name="description" content="Learn about Uneeco Uganda Limited — established in 1984, we are one of East Africa's leading suppliers to the print and packaging industry, with over 8,000 products and 15,000 sq metres of warehousing.">
+    <link rel="icon" type="image/png" href="../assets/images/uneeco_logo.webp">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <!-- Main site styles -->
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="../assets/css/responsive.css">
+    <!-- About-specific styles -->
+    <link rel="stylesheet" href="../assets/css/about.css">
+</head>
+
+<body>
+
+    <!-- TOP BANNER -->
+    <div class="top-banner">
+        <div class="container d-flex justify-content-between align-items-center">
+            <p class="top-banner-text">Free delivery for all our clients on Nasser street. <a href="contact.html#cf-message"
+                    style="text-decoration: none; color: #fff;"><b>ORDER NOW</b></a></p>
+            <div class="top-banner-socials">
+                <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+
+        <div class="container">
+            <a class="navbar-brand" href="../index.html"><img src="../assets/images/uneeco_logo.webp" alt="Uneeco Logo"
+                    class="img-fluid" fetchpriority="high"></a>
+            <button class="navbar-toggler collapsed" id="navToggler" type="button"
+                aria-label="Toggle navigation" aria-expanded="false">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-lg-center" id="navLinks">
+                    <li class="nav-item"><a class="nav-link" href="../index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="products.html">Products</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="about.html">About Us</a></li>
+                    <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+                    <li class="nav-item d-lg-none">
+                        <a class="nav-link" href="#account">
+                            <i class="fas fa-user me-1"></i> My Account
+                        </a>
+                    </li>
+                </ul>
+                <div class="search-bar" id="searchBar" style="display: none;">
+                    <input type="text" class="form-control" placeholder="Search..." id="searchInput">
+                </div>
+            </div>
+            <div class="navbar-icons">
+                <button class="search-icon" id="searchBtn"><i class="fas fa-search"></i></button>
+                <div class="cart-icon" id="cartBtn">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count" id="cartCount">0</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+
+    <!-- ══════════════════════════════════════════
+         ABOUT HERO
+    ══════════════════════════════════════════ -->
+    <header class="about-hero">
+        <div class="about-hero-overlay"></div>
+        <div class="about-hero-grid"></div>
+        <div class="container position-relative" style="z-index:2;">
+            <div class="row align-items-center min-vh-50">
+                <div class="col-lg-7" data-aos="fade-up" data-aos-duration="900">
+                    <div class="hero-eyebrow">Trusted Across East Africa</div>
+                    <h1 class="hero-title">About Us</h1>
+                    <p class="hero-sub">
+                        From a single warehouse to over 15,000 sq metres of facilities across East Africa —
+                        four decades of delivering excellence to the print and packaging industry.
+                    </p>
+                </div>
+                <div class="col-lg-5 d-none d-lg-flex justify-content-end" data-aos="fade-up" data-aos-delay="300">
+                    <div class="about-hero-badge">
+                        <div class="about-hero-badge-inner">
+                            <span class="badge-year">1984</span>
+                            <span class="badge-divider"></span>
+                            <span class="badge-label">Established</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ══════════════════════════════════════════
+         STAT STRIP
+    ══════════════════════════════════════════ -->
+    <!-- <section class="about-stat-strip">
+        <div class="container">
+            <div class="row g-0 justify-content-center">
+                <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="0">
+                    <div class="stat-item">
+                        <div class="stat-num">40<span>+</span></div>
+                        <div class="stat-label">Years in Operation</div>
+                    </div>
+                </div>
+                <div class="stat-divider d-none d-md-block"></div>
+                <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="100">
+                    <div class="stat-item">
+                        <div class="stat-num">8,000<span>+</span></div>
+                        <div class="stat-label">Products Available</div>
+                    </div>
+                </div>
+                <div class="stat-divider d-none d-md-block"></div>
+                <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="200">
+                    <div class="stat-item">
+                        <div class="stat-num">15k<span>m²</span></div>
+                        <div class="stat-label">Warehouse Space</div>
+                    </div>
+                </div>
+                <div class="stat-divider d-none d-md-block"></div>
+                <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="300">
+                    <div class="stat-item">
+                        <div class="stat-num">500<span>+</span></div>
+                        <div class="stat-label">Happy Clients</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section> -->
+
+    <!-- ══════════════════════════════════════════
+         OUR STORY SECTION
+    ══════════════════════════════════════════ -->
+    <section class="about-story-section">
+        <div class="container">
+            <div class="row justify-content-center mb-5">
+                <div class="col-lg-8 text-center" data-aos="fade-up">
+                    <span class="section-tag">Our Story</span>
+                    <!-- <h2 class="section-title">Built on Decades of Expertise</h2> -->
+                </div>
+            </div>
+
+            <div class="row g-5 align-items-start">
+                <div class="col-lg-6" data-aos="none">
+                    <div class="story-block">
+                        <p class="story-text">
+                            Established in 1984, Uneeco has grown at an unprecedented pace to firmly establish itself
+                            as one of the leading suppliers to the Print and Packaging industry in East Africa. Now
+                            successfully operating for 30+ years in the region, we have built a vast knowledge and
+                            expertise on print media — and yet we couldn't be more excited about what the future
+                            holds for print.
+                        </p>
+                        <p class="story-text">
+                            With large warehousing facilities of over 15,000 sq metres in various East African cities,
+                            we pride ourselves in being the 'one stop shop' for the entire graphic arts industry
+                            irrespective of print technology.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-6" data-aos="none">
+                    <div class="story-block">
+                        <p class="story-text">
+                            We have a market leading range of over 8,000 products including a wide range of paper
+                            and packaging substrates, promotional and visual communicational material as well as
+                            print machinery, inks, plates, chemicals and various other printing consumables — all
+                            backed up with service and support that is second to none.
+                        </p>
+                        <p class="story-text">
+                            Whether you're running a large commercial printing organisation, graphic design studio
+                            or advertising agency, a converting (packaging) company, a reprographic house / trade shop,
+                            or a small office, we have something to offer your business and help you get the best
+                            from your paper based communication, whilst adding value to your supply chain.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Full-width pull quote -->
+            <div class="row mt-5" data-aos="fade-up">
+                <div class="col-12">
+                    <blockquote class="about-pullquote">
+                        <i class="fas fa-quote-left about-quote-icon"></i>
+                        <p>Here at Uneeco, we continually strive to provide our clients with innovative
+                            technological solutions to print and production challenges.</p>
+                    </blockquote>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         WHO WE ARE — THREE PILLARS
+    ══════════════════════════════════════════ -->
+    <section class="values-section">
+        <div class="container">
+            <div class="row justify-content-center mb-5">
+                <div class="col-lg-7 text-center" data-aos="fade-up">
+                    <h2 class="section-title">Who We Are</h2>
+                    <p class="section-lead">
+                        Environmental stewardship and ethical sourcing are at the heart of everything we do.
+                    </p>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="0">
+                    <div class="value-card">
+                        <div class="value-icon"><i class="fas fa-seedling"></i></div>
+                        <h5>Our Mission</h5>
+                        <p>To empower printing business across Uganda by providing reliable printing supplies, right-quality products.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="0">
+                    <div class="value-card">
+                        <div class="value-icon"><i class="fas fa-bullseye"></i></div>
+                        <h5>Our Vision</h5>
+                        <p>Become the most trusted and indispensable partner for the printing and packaging industry in East Africa.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="100">
+                    <div class="value-card">
+                        <div class="value-icon"><i class="fas fa-handshake"></i></div>
+                        <h5>UNEECO's Promise</h5>
+                        <p>We shall strive to serve all our Customers efficiently and effectively.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="200">
+                    <div class="value-card">
+                        <div class="value-icon"><i class="fas fa-tags"></i></div>
+                        <h5>We Can Deliver</h5>
+                        <p>Solutions that are most meaningful and add value to each and every print converter</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         FOOTER
+    ══════════════════════════════════════════ -->
+    <!-- FOOTER -->
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <div class="row g-5">
+                <div class="col-lg-3 text-center">
+                    <div class="footer-brand">Uneeco (U) Ltd</div>
+                    <p>Uganda's trusted paper supply company. Providing quality paper products to businesses, schools
+                        and institutions since 1984.</p>
+                </div>
+                <div class="col-lg-4">
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="footer-hq-city">Kampala</p>
+                            <p class="footer-hq-detail">Shop 8, JP Plaza,<br>
+                                Nkrumah Rd, Kampala</p>
+                            <a href="tel:+256703650311" class="footer-link">0703 650311</a>
+                            <a href="tel:+256752450400" class="footer-link">0752450400</a>
+                        </div>
+                        <div class="col-6">
+                            <p class="footer-hq-city">Nairobi</p>
+                            <p class="footer-hq-detail">Kitui Rd, Off Kampala Rd,<br>
+                                Off Enterprise Rd, Industrial Area</p>
+                            <a href="tel:+254721786337" class="footer-link">0721 786 337</a>
+                            <a href="tel:+254738786335" class="footer-link">0738 786 335</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="footer-heading">Products</div>
+                            <a href="products.html#large-format" class="footer-link">Large Format</a>
+                            <a href="products.html#art-paper" class="footer-link">Art Paper &amp; Board</a>
+                            <a href="products.html#offset-sundries" class="footer-link">Offset Sundries</a>
+                            <a href="products.html#inks" class="footer-link">Inks &amp; Chemicals</a>
+                            <!-- <a href="products.html#plates" class="footer-link">Plates</a> -->
+                        </div>
+                        <div class="col-6">
+                            <div class="footer-heading">Contact</div>
+                            <a href="tel:+256703650311" class="footer-link"><i class="fas fa-phone-alt me-2"
+                                    style="font-size:0.75rem;color:var(--primary-light);"></i>+256 703 650 311</a>
+                            <a href="mailto:info@uneeco.co.ug" class="footer-link"><i class="fas fa-envelope me-2"
+                                    style="font-size:0.75rem;color:var(--primary-light);"></i>info@uneeco.co.ug</a>
+                            <span class="footer-link"><i class="fas fa-map-marker-alt me-2"
+                                    style="font-size:0.75rem;color:var(--primary-light);"></i>Kampala, Uganda</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr class="footer-divider">
+            <div class="row align-items-center">
+                <div class="col-md-6 footer-bottom">&copy; 2025 Uneeco Uganda. All rights reserved.</div>
+                <div class="col-md-6 text-md-end footer-bottom">Supplying Quality Paper Across Uganda</div>
+            </div>
+        </div>
+    </footer>
+    <!-- BACK TO TOP -->
+    <a href="#" class="back-to-top" id="backToTop"><i class="fas fa-arrow-up"></i></a>
+
+    <!-- MOBILE SIDEBAR NAV -->
+    <div class="mobile-sidebar-overlay" id="mobileSidebarOverlay"></div>
+    <div class="mobile-sidebar" id="mobileSidebar" aria-hidden="true">
+        <div class="mobile-sidebar-header">
+            <img src="../assets/images/uneeco_logo.webp" alt="Uneeco Logo" class="mobile-sidebar-logo" loading="lazy">
+            <button class="mobile-sidebar-close" id="mobileSidebarClose" aria-label="Close menu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="mobile-sidebar-nav">
+            <a href="../index.html" class="mobile-sidebar-link">Home</a>
+            <a href="products.html" class="mobile-sidebar-link">Products</a>
+            <a href="about.html" class="mobile-sidebar-link active">About Us</a>
+            <a href="contact.html" class="mobile-sidebar-link">Contact</a>
+        </nav>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+
+        <!-- Custom Scripts -->
+    <script src="../assets/js/animations.js"></script>
+    <script src="../assets/js/navbar.js"></script>
+    <script src="../assets/js/scroll.js"></script>
+</body>
+
+</html>

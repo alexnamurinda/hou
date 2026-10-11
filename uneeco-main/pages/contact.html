@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us | Uneeco Uganda</title>
+    <meta name="description" content="Contact Uneeco Uganda Limited for bulk orders, product enquiries and quotes. Visit us at Shop 8, JP Plaza, Nkrumah Road, Kampala, or call +256 703 650 311.">
+    <link rel="icon" type="image/png" href="../assets/images/uneeco_logo.webp">
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- AOS Animations -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+
+    <!-- Base Styles (brand variables live here) -->
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="../assets/css/responsive.css">
+    <!-- Contact Page Styles -->
+    <link rel="stylesheet" href="../assets/css/contact.css">
+    <!-- Google reCAPTCHA v2 -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+
+<body>
+
+    <!-- ════════════════════════════════════════
+         TOP BANNER
+    ════════════════════════════════════════ -->
+    <div class="top-banner">
+        <div class="container d-flex justify-content-between align-items-center">
+            <p class="top-banner-text">Free delivery for all our clients on Nasser street. <a href="#cf-message"
+                    style="text-decoration: none; color: #fff;"><b>ORDER NOW</b></a></p>
+            <div class="top-banner-socials">
+                <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+
+        <div class="container">
+            <a class="navbar-brand" href="../index.html"><img src="../assets/images/uneeco_logo.webp" alt="Uneeco Logo"
+                    class="img-fluid" fetchpriority="high"></a>
+            <button class="navbar-toggler collapsed" id="navToggler" type="button"
+                aria-label="Toggle navigation" aria-expanded="false">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-lg-center" id="navLinks">
+                    <li class="nav-item"><a class="nav-link" href="../index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="products.html">Products</a></li>
+                    <li class="nav-item"><a class="nav-link" href="about.html">About Us</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="contact.html">Contact</a></li>
+                    <li class="nav-item d-lg-none">
+                        <a class="nav-link" href="#account">
+                            <i class="fas fa-user me-1"></i> My Account
+                        </a>
+                    </li>
+                </ul>
+                <div class="search-bar" id="searchBar" style="display: none;">
+                    <input type="text" class="form-control" placeholder="Search..." id="searchInput">
+                </div>
+            </div>
+            <div class="navbar-icons">
+                <button class="search-icon" id="searchBtn"><i class="fas fa-search"></i></button>
+                <div class="cart-icon" id="cartBtn">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count" id="cartCount">0</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+
+    <!-- ════════════════════════════════════════
+         CONTACT HERO
+    ════════════════════════════════════════ -->
+    <header class="contact-hero">
+        <div class="contact-hero-overlay"></div>
+        <div class="contact-hero-grid"></div>
+        <div class="container position-relative" style="z-index:2;">
+            <div class="row align-items-center min-vh-50">
+                <div class="col-lg-7" data-aos="fade-up" data-aos-duration="900">
+                    <div class="hero-eyebrow">Get In Touch With Us</div>
+                    <h1 class="hero-title">Let's Talk Paper</h1>
+                    <p class="hero-sub">
+                        From bulk orders to product enquiries — our team in Kampala is ready to assist. Reach out and
+                        we'll respond within one business day.
+                    </p>
+                </div>
+                <!-- <div class="col-lg-5 d-none d-lg-flex justify-content-end" data-aos="fade-up" data-aos-delay="300">
+                    <div class="about-hero-badge">
+                        <div class="about-hero-badge-inner">
+                            <i class="fas fa-phone-alt"></i>
+                        </div>
+                    </div>
+                </div> -->
+            </div>
+        </div>
+    </header>
+
+    <!-- ════════════════════════════════════════
+         MAIN CONTACT SECTION
+    ════════════════════════════════════════ -->
+    <section class="contact-main">
+        <div class="container">
+            <div class="row g-5 align-items-start">
+
+                <!-- LEFT: Info -->
+                <div class="col-lg-5" data-aos="fade-in" data-aos-duration="800">
+                    <span class="contact-section-tag">Our Details</span>
+                    <!-- <h2 class="contact-section-title">We'd Love to<br>Hear From You</h2> -->
+                    <p class="contact-section-lead">
+                        Whether you're looking for a bulk order quote, product specifications, or just have a general
+                        enquiry — our team is standing by.
+                    </p>
+
+                    <!-- Info Blocks -->
+                    <div class="info-block-grid">
+                        <div class="info-block">
+                            <div class="info-block-icon"><i class="fas fa-phone-alt"></i></div>
+                            <div class="info-block-content">
+                                <small>Call Us</small>
+                                <a href="tel:+256703650311">+256703650311</a>
+                            </div>
+                        </div>
+                        <div class="info-block">
+                            <div class="info-block-icon"><i class="fas fa-envelope"></i></div>
+                            <div class="info-block-content">
+                                <small>Email Us</small>
+                                <a href="mailto:info@uneeco.co.ug">info@uneeco.co.ug</a>
+                            </div>
+                        </div>
+                        <div class="info-block">
+                            <div class="info-block-icon"><i class="fas fa-map-marker-alt"></i></div>
+                            <div class="info-block-content">
+                                <small>Visit Us</small>
+                                <p>Shop8 JP Plaza, Nkrumah Rd <br> Kampala, Uganda</p>
+                            </div>
+                        </div>
+                        <div class="info-block">
+                            <div class="info-block-icon"><i class="fab fa-whatsapp"></i></div>
+                            <div class="info-block-content">
+                                <small>WhatsApp</small>
+                                <a href="https://wa.me/256703650311" target="_blank" rel="noopener">Chat with us</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hours Card -->
+                    <div class="hours-card" data-aos="fade-up" data-aos-delay="100">
+                        <div class="hours-card-title"><i class="fas fa-clock me-2"></i>Business Hours</div>
+                        <div class="hours-row">
+                            <span class="hours-day">Monday – Friday</span>
+                            <span class="hours-time">8:00 AM – 6:00 PM <span class="hours-badge">Open</span></span>
+                        </div>
+                        <div class="hours-row">
+                            <span class="hours-day">Saturday</span>
+                            <span class="hours-time">9:00 AM – 2:00 PM</span>
+                        </div>
+                        <div class="hours-row">
+                            <span class="hours-day">Sunday</span>
+                            <span class="hours-time closed">Closed</span>
+                        </div>
+                        <div class="hours-row">
+                            <span class="hours-day">Public Holidays</span>
+                            <span class="hours-time closed">Closed</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Form -->
+                <div class="col-lg-7" data-aos="fade-in" data-aos-duration="800">
+                    <div class="form-wrapper">
+
+                        <!-- Normal form view -->
+                        <div id="formView">
+                            <h3 class="form-wrapper-title">Send Us a Message</h3>
+                            <p class="form-wrapper-sub">Fill in the form below and we'll get back to you immediately.</p>
+
+                            <form id="contactForm" novalidate>
+
+                                <!-- Email + WhatsApp row -->
+                                <div class="form-row-split">
+                                    <div class="cf-group">
+                                        <label class="cf-label" for="cf-email">Email Address <span>*</span></label>
+                                        <input type="email" id="cf-email" class="cf-input" placeholder="you@example.com" required>
+                                    </div>
+                                    <div class="cf-group">
+                                        <label class="cf-label" for="cf-whatsapp">WhatsApp Number <span>*</span></label>
+                                        <input type="tel" id="cf-whatsapp" class="cf-input" placeholder="+256 700 000 000" required>
+                                    </div>
+                                </div>
+
+                                <!-- Subject select -->
+                                <div class="cf-group">
+                                    <label class="cf-label" for="cf-subject">Subject <span>*</span></label>
+                                    <div class="cf-select-wrap">
+                                        <select id="cf-subject" class="cf-select cf-input" required>
+                                            <option value="" disabled selected>Select an inquiry type…</option>
+                                            <option value="quote">Request a Quote</option>
+                                            <option value="bulk">Bulk / Wholesale Order</option>
+                                            <option value="product">Product Information</option>
+                                            <option value="delivery">Delivery &amp; Logistics</option>
+                                            <option value="partnership">Partnership</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Message -->
+                                <div class="cf-group">
+                                    <label class="cf-label" for="cf-message">Message <span>*</span></label>
+                                    <textarea id="cf-message" class="cf-textarea" placeholder="" required></textarea>
+                                </div>
+
+                                <!-- reCAPTCHA -->
+                                <div class="cf-recaptcha">
+                                    <div class="g-recaptcha" data-sitekey="6LcDLvAsAAAAALOlAywDWWvEE9HUBg06NqRmhpGT"></div>
+                                </div>
+
+                                <!-- Submit -->
+                                <button type="submit" class="cf-submit">
+                                    Send Message <i class="fas fa-arrow-right"></i>
+                                </button>
+
+                            </form>
+                        </div>
+
+                        <!-- Success view (hidden by default) -->
+                        <div class="form-success" id="formSuccess">
+                            <div class="form-success-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <h4>Message Sent!</h4>
+                            <p>Thank you for reaching out. Our team will get back to you shortly.</p>
+                            <button class="cf-submit mt-3" style="width:auto; padding: 12px 32px;"
+                                onclick="resetForm()">
+                                Send Another <i class="fas fa-redo" style="font-size:0.8rem;"></i>
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+         MAP SECTION
+    ════════════════════════════════════════ -->
+    <section class="map-section">
+        <div class="container">
+            <div class="row mb-4 align-items-end">
+                <div class="col-lg-7" data-aos="fade-up">
+                    <span class="contact-section-tag">Find Us</span>
+                    <h2 class="contact-section-title">Our Location</h2>
+                    <p class="contact-section-lead">Based in Kampala, we supply quality paper products across Uganda.
+                    </p>
+                </div>
+                <div class="col-lg-5 text-lg-end" data-aos="fade-up">
+                    <a href="https://www.google.com/maps?q=UNEECO+Uganda+Limited+JP+Plaza+Kampala" target="_blank" rel="noopener"
+                        class="btn-primary-green">
+                        <i class="fas fa-directions" style="font-size:0.85rem;"></i> Get Directions
+                    </a>
+                </div>
+            </div>
+
+            <div class="map-wrapper" data-aos="fade-up" data-aos-duration="800">
+                <!-- Embedded Google Map -->
+                <iframe src="https://www.google.com/maps?q=UNEECO+Uganda+Limited+JP+Plaza+Kampala&output=embed"
+                    width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade" title="UNEECO Uganda – JP Plaza Kampala">
+                </iframe>
+
+                <!-- Pin overlay card -->
+                <div class="map-pin-overlay">
+                    <div class="map-pin-icon"><i class="fas fa-map-marker-alt"></i></div>
+                    <div class="map-pin-text">
+                        <strong>Uneeco Uganda</strong>
+                        <span>Kampala, Uganda</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+         FAQ SECTION
+    ════════════════════════════════════════ -->
+    <section class="faq-section">
+        <div class="container">
+            <div class="row justify-content-center mb-5">
+                <div class="col-lg-7 text-center" data-aos="fade-up">
+                    <h2 class="contact-section-title">Frequently Asked</h2>
+                </div>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-8" data-aos="fade-up" data-aos-delay="50">
+                    <div class="accordion faq-accordion" id="faqAccordion">
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#faq1">
+                                    Do you offer bulk or wholesale pricing?
+                                </button>
+                            </h2>
+                            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Yes — we provide competitive bulk and wholesale pricing for businesses, schools, and
+                                    institutions. Please contact us with your required quantities and we will send a
+                                    tailored quote within one business day.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#faq2">
+                                    What areas do you deliver to?
+                                </button>
+                            </h2>
+                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    We deliver across Uganda, including Kampala, Entebbe, Jinja, Mbarara, Gulu, and
+                                    other major towns. Delivery timelines and fees vary by location — reach out for
+                                    specifics.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hidden FAQs (3–5) -->
+                        <div id="faqExtra" style="display:none;">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#faq3">
+                                        What payment methods do you accept?
+                                    </button>
+                                </h2>
+                                <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body">
+                                        We accept mobile money (MTN & Airtel), bank transfers, and cash on collection. For
+                                        institutional clients we can arrange invoicing with agreed payment terms.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#faq4">
+                                        How quickly will you respond to my enquiry?
+                                    </button>
+                                </h2>
+                                <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body">
+                                        We aim to respond to all enquiries within 24 hours on business days. For urgent
+                                        matters, please call us directly or reach us via WhatsApp.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#faq5">
+                                        Can I visit your premises to view products?
+                                    </button>
+                                </h2>
+                                <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body">
+                                        Absolutely. Our Kampala office is open Monday to Friday 8 AM–6 PM and Saturdays 9
+                                        AM–2 PM. We recommend calling ahead so we can have the right team member available
+                                        for you.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- View All / Show Less toggle -->
+                    <div class="text-center mt-4">
+                        <button class="faq-toggle-btn" id="faqToggleBtn" onclick="toggleFaq()">
+                            View All <i class="fas fa-chevron-down ms-1"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+         FOOTER
+    ════════════════════════════════════════ -->
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <div class="row g-5">
+                <div class="col-lg-3 text-center">
+                    <div class="footer-brand">Uneeco (U) Ltd</div>
+                    <p>Uganda's trusted paper supply company. Providing quality paper products to businesses, schools
+                        and institutions since establishment.</p>
+                </div>
+                <div class="col-lg-4">
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="footer-hq-city">Kampala</p>
+                            <p class="footer-hq-detail">Shop 8, JP Plaza,<br>
+                                Nkrumah Rd, Kampala</p>
+                            <a href="tel:+256703650311" class="footer-link">0703 650311</a>
+                            <a href="tel:+256752450400" class="footer-link">0752450400</a>
+                        </div>
+                        <div class="col-6">
+                            <p class="footer-hq-city">Nairobi</p>
+                            <p class="footer-hq-detail">Kitui Rd, Off Kampala Rd,<br>
+                                Off Enterprise Rd, Industrial Area</p>
+                            <a href="tel:+254721786337" class="footer-link">0721 786 337</a>
+                            <a href="tel:+254738786335" class="footer-link">0738 786 335</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="footer-heading">Products</div>
+                            <a href="products.html#large-format" class="footer-link">Large Format</a>
+                            <a href="products.html#art-paper" class="footer-link">Art Paper &amp; Board</a>
+                            <a href="products.html#offset-sundries" class="footer-link">Offset Sundries</a>
+                            <a href="products.html#inks" class="footer-link">Inks &amp; Chemicals</a>
+                            <!-- <a href="products.html#plates" class="footer-link">Plates</a> -->
+                        </div>
+                        <div class="col-6">
+                            <div class="footer-heading">Contact</div>
+                            <a href="tel:+256703650311" class="footer-link"><i class="fas fa-phone-alt me-2"
+                                    style="font-size:0.75rem;color:var(--primary-light);"></i>+256 703 650 311</a>
+                            <a href="mailto:info@uneeco.co.ug" class="footer-link"><i class="fas fa-envelope me-2"
+                                    style="font-size:0.75rem;color:var(--primary-light);"></i>info@uneeco.co.ug</a>
+                            <span class="footer-link"><i class="fas fa-map-marker-alt me-2"
+                                    style="font-size:0.75rem;color:var(--primary-light);"></i>Kampala, Uganda</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr class="footer-divider">
+            <div class="row align-items-center">
+                <div class="col-md-6 footer-bottom">&copy; 2025 Uneeco Uganda. All rights reserved.</div>
+                <div class="col-md-6 text-md-end footer-bottom">Supplying Quality Paper Across Uganda</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- BACK TO TOP -->
+    <a href="#" class="back-to-top" id="backToTop" aria-label="Back to top">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+
+    <!-- ════════════════════════════════════════
+         SCRIPTS
+    ════════════════════════════════════════ -->
+    <!-- MOBILE SIDEBAR NAV -->
+    <div class="mobile-sidebar-overlay" id="mobileSidebarOverlay"></div>
+    <div class="mobile-sidebar" id="mobileSidebar" aria-hidden="true">
+        <div class="mobile-sidebar-header">
+            <img src="../assets/images/uneeco_logo.webp" alt="Uneeco Logo" class="mobile-sidebar-logo" loading="lazy">
+            <button class="mobile-sidebar-close" id="mobileSidebarClose" aria-label="Close menu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="mobile-sidebar-nav">
+            <a href="../index.html" class="mobile-sidebar-link">Home</a>
+            <a href="products.html" class="mobile-sidebar-link">Products</a>
+            <a href="about.html" class="mobile-sidebar-link">About Us</a>
+            <a href="contact.html" class="mobile-sidebar-link active">Contact</a>
+        </nav>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+
+    <!-- Custom Scripts -->
+    <script src="../assets/js/animations.js"></script>
+    <script src="../assets/js/navbar.js"></script>
+    <script src="../assets/js/scroll.js"></script>
+    <script src="../assets/js/contact.js"></script>
+    <script>
+        function toggleFaq() {
+            const extra = document.getElementById('faqExtra');
+            const btn   = document.getElementById('faqToggleBtn');
+            const open  = extra.style.display === 'block';
+            extra.style.display = open ? 'none' : 'block';
+            btn.innerHTML = open
+                ? 'View All <i class="fas fa-chevron-down ms-1"></i>'
+                : 'Show Less <i class="fas fa-chevron-up ms-1"></i>';
+        }
+    </script>
+    <script>
+        if (window.location.hash === '#cf-email') {
+            window.addEventListener('load', function () {
+                var el = document.getElementById('cf-email');
+                if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.focus(); }
+            });
+        }
+    </script>
+</body>
+
+</html>
