@@ -38,10 +38,11 @@ $rateKey = auth_attempt_key('signup_otp_send', $email);
 $ipRateKey = auth_attempt_key('signup_otp_send_ip', '');
 enforce_auth_rate_limit($rateKey, 3, 3600);
 enforce_auth_rate_limit($ipRateKey, 10, 3600);
-$lastAttempt = $pdo->prepare('SELECT attempted_at FROM auth_attempts WHERE attempt_key = ? ORDER BY id DESC LIMIT 1');
-$lastAttempt->execute([$rateKey]);
-$lastSentAt = $lastAttempt->fetchColumn();
-if ($lastSentAt !== false && strtotime((string)$lastSentAt) > time() - 60) {
+$recentAttempt = $pdo->prepare(
+    'SELECT 1 FROM auth_attempts WHERE attempt_key = ? AND attempted_at >= DATE_SUB(NOW(), INTERVAL 60 SECOND) LIMIT 1'
+);
+$recentAttempt->execute([$rateKey]);
+if ($recentAttempt->fetchColumn() !== false) {
     respond_json(429, ['success' => false, 'message' => 'Please wait a minute before requesting another code.']);
 }
 record_auth_attempt($rateKey);
