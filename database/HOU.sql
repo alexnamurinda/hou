@@ -6,6 +6,7 @@ USE HOU;
 
 CREATE TABLE IF NOT EXISTS members (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  registration_number CHAR(8) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   full_name VARCHAR(150) NOT NULL,
   area_of_operation VARCHAR(180) NOT NULL,
   phone VARCHAR(20) NOT NULL,
@@ -15,6 +16,7 @@ CREATE TABLE IF NOT EXISTS members (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
+  UNIQUE KEY uq_members_registration_number (registration_number),
   UNIQUE KEY uq_members_phone (phone),
   UNIQUE KEY uq_members_email (email)
 ) ENGINE=InnoDB;

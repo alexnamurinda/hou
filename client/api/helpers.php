@@ -123,7 +123,7 @@ function require_member(): array
     }
 
     $query = db_connect()->prepare(
-        "SELECT id, full_name, area_of_operation, phone, email, created_at FROM members WHERE id = ? AND status = 'active' LIMIT 1"
+        "SELECT id, registration_number, full_name, area_of_operation, phone, email, created_at FROM members WHERE id = ? AND status = 'active' LIMIT 1"
     );
     $query->execute([$memberId]);
     $member = $query->fetch();

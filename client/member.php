@@ -137,12 +137,14 @@ header('X-Content-Type-Options: nosniff');
               <span>Active member</span>
             </div>
             <dl class="portal-details">
+              <div><dt>Registration number</dt><dd><?= escape_html($member['registration_number']) ?></dd></div>
               <div><dt>Full name</dt><dd><?= escape_html($member['full_name']) ?></dd></div>
               <div><dt>Area of operation</dt><dd><?= escape_html($member['area_of_operation']) ?></dd></div>
               <div><dt>Phone number</dt><dd><?= escape_html($member['phone']) ?></dd></div>
               <div><dt>Email address</dt><dd><?= escape_html($member['email']) ?></dd></div>
               <div><dt>Member since</dt><dd><?= escape_html(date('F Y', strtotime($member['created_at']))) ?></dd></div>
             </dl>
+            <p>Your registration number is your HOU member ID. Keep it safe; your membership certificate will be provided here in the members portal.</p>
           </section>
 
           <section class="portal-help-card" aria-labelledby="help-heading">

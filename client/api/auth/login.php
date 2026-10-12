@@ -9,24 +9,30 @@ start_member_session();
 $body = read_json_body();
 require_csrf_token($body);
 
-$rawPhone = trim((string)($body['phone'] ?? ''));
-$phone = normalize_phone($rawPhone);
+$identifier = trim((string)($body['identifier'] ?? $body['phone'] ?? ''));
+$registrationNumber = strtoupper($identifier);
+$isRegistrationNumber = preg_match('/^[A-Z]{2}\d{5}[A-Z]$/', $registrationNumber) === 1;
+$phone = $isRegistrationNumber ? null : normalize_phone($identifier);
 $password = (string)($body['password'] ?? '');
-$rateIdentity = $phone ?? preg_replace('/\D/', '', $rawPhone);
+$rateIdentity = $isRegistrationNumber ? $registrationNumber : ($phone ?? preg_replace('/\D/', '', $identifier));
 $rateKey = auth_attempt_key('login', $rateIdentity);
 enforce_auth_rate_limit($rateKey, 10, 900);
 
 $pdo = db_connect();
 $member = null;
-if ($phone !== null && $password !== '') {
-    $query = $pdo->prepare('SELECT id, password_hash, status FROM members WHERE phone = ? LIMIT 1');
-    $query->execute([$phone]);
+if (($phone !== null || $isRegistrationNumber) && $password !== '') {
+    $query = $pdo->prepare(
+        $isRegistrationNumber
+            ? 'SELECT id, password_hash, status FROM members WHERE registration_number = ? LIMIT 1'
+            : 'SELECT id, password_hash, status FROM members WHERE phone = ? LIMIT 1'
+    );
+    $query->execute([$isRegistrationNumber ? $registrationNumber : $phone]);
     $member = $query->fetch();
 }
 
 if (!$member || !password_verify($password, $member['password_hash'])) {
     record_auth_attempt($rateKey);
-    respond_json(401, ['success' => false, 'message' => 'Invalid phone number or password.']);
+    respond_json(401, ['success' => false, 'message' => 'Invalid phone number or registration number, or password.']);
 }
 if ($member['status'] !== 'active') {
     respond_json(403, ['success' => false, 'message' => 'This account is not active. Please contact HOU.']);

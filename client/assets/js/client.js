@@ -232,7 +232,7 @@
   loginForm?.addEventListener('submit', (event) => {
     event.preventDefault();
     submitAuthForm(loginForm, 'api/auth/login.php', () => ({
-      phone: document.getElementById('login-identifier').value,
+      identifier: document.getElementById('login-identifier').value,
       password: document.getElementById('login-password').value,
     }));
   });
@@ -258,8 +258,8 @@
       (result) => {
         showPanel('login');
         window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#login`);
-        document.getElementById('login-identifier').value = document.getElementById('signup-phone').value;
-        showFeedback(result.message || 'Your account has been created. Please log in now.', 'success');
+        document.getElementById('login-identifier').value = result.registration_number || document.getElementById('signup-phone').value;
+        showFeedback(result.message || 'Your account has been created. Please log in now.', result.email_sent === false ? 'error' : 'success');
         document.getElementById('login-identifier').focus();
       }
     );

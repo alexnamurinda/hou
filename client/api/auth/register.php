@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../helpers.php';
+require_once __DIR__ . '/signup-mailer.php';
 set_api_headers();
 require_method('POST');
 start_member_session();
@@ -46,17 +47,75 @@ if ($duplicate) {
     respond_json(409, ['success' => false, 'message' => $message]);
 }
 
+$insert = $pdo->prepare(
+    'INSERT INTO members (registration_number, full_name, area_of_operation, phone, email, password_hash) VALUES (?, ?, ?, ?, ?, ?)'
+);
+$pdo->beginTransaction();
+$registrationNumber = '';
+$inserted = false;
+$duplicateMessage = '';
 try {
-    $insert = $pdo->prepare(
-        'INSERT INTO members (full_name, area_of_operation, phone, email, password_hash) VALUES (?, ?, ?, ?, ?)'
-    );
-    $insert->execute([$name, 'Not provided', $phone, $email, password_hash($password, PASSWORD_DEFAULT)]);
-} catch (PDOException $error) {
-    if ($error->getCode() === '23000') {
-        respond_json(409, ['success' => false, 'message' => 'An account already exists with those details. Try logging in instead.']);
+    for ($attempt = 0; $attempt < 10; $attempt++) {
+        $registrationNumber = generate_member_registration_number();
+        try {
+            $insert->execute([
+                $registrationNumber,
+                $name,
+                'Not provided',
+                $phone,
+                $email,
+                password_hash($password, PASSWORD_DEFAULT),
+            ]);
+            $inserted = true;
+            break;
+        } catch (PDOException $error) {
+            if ($error->getCode() !== '23000') {
+                throw $error;
+            }
+
+            $duplicateCheck = $pdo->prepare('SELECT phone, email FROM members WHERE phone = ? OR email = ? LIMIT 1');
+            $duplicateCheck->execute([$phone, $email]);
+            $duplicate = $duplicateCheck->fetch();
+            if ($duplicate) {
+                $duplicateMessage = $duplicate['phone'] === $phone
+                    ? 'This phone number is already registered. Try logging in instead.'
+                    : 'This email address is already registered. Try logging in instead.';
+                break;
+            }
+        }
+    }
+    if (!$inserted) {
+        $pdo->rollBack();
+        if ($duplicateMessage !== '') {
+            respond_json(409, ['success' => false, 'message' => $duplicateMessage]);
+        }
+        error_log('HOU registration failed: could not allocate a unique registration number.');
+        respond_json(503, ['success' => false, 'message' => 'We could not complete your registration right now. Please try again.']);
+    }
+
+    $pdo->commit();
+} catch (Throwable $error) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
     }
     throw $error;
 }
 
+$emailSent = true;
+try {
+    send_registration_number_email($email, $name, $registrationNumber);
+} catch (Throwable $error) {
+    $emailSent = false;
+    error_log('HOU registration number email failed: ' . $error->getMessage());
+}
+
 unset($_SESSION['signup_verified']);
-respond_json(201, ['success' => true, 'message' => 'Your HOU member account has been created. Please log in now.']);
+respond_json(201, [
+    'success' => true,
+    'registration_number' => $registrationNumber,
+    'email_sent' => $emailSent,
+    'message' => $emailSent
+        ? 'Your account has been created. Your registration number has been emailed to you; keep it safe. Please log in now.'
+        : 'Your account was created, but we could not email your registration number. Keep it safe: '
+            . $registrationNumber . '. You can log in now.',
+]);

@@ -33,9 +33,9 @@ $filters = [];
 $parameters = [];
 
 if ($search !== '') {
-    $filters[] = '(full_name LIKE ? OR email LIKE ? OR phone LIKE ? OR area_of_operation LIKE ?)';
+    $filters[] = '(registration_number LIKE ? OR full_name LIKE ? OR email LIKE ? OR phone LIKE ? OR area_of_operation LIKE ?)';
     $term = '%' . $search . '%';
-    array_push($parameters, $term, $term, $term, $term);
+    array_push($parameters, $term, $term, $term, $term, $term);
 }
 if ($area !== '') {
     $filters[] = 'area_of_operation LIKE ?';
@@ -84,7 +84,7 @@ $returnUrl = 'members.php' . ($returnQuery ? '?' . http_build_query($returnQuery
 $member = null;
 if ($memberId !== false && $memberId !== null) {
     $statement = $pdo->prepare(
-        'SELECT id, full_name, area_of_operation, phone, email, status, created_at, updated_at FROM members WHERE id = ? LIMIT 1'
+        'SELECT id, registration_number, full_name, area_of_operation, phone, email, status, created_at, updated_at FROM members WHERE id = ? LIMIT 1'
     );
     $statement->execute([$memberId]);
     $member = $statement->fetch();
@@ -101,13 +101,13 @@ $offset = ($page - 1) * $pageSize;
 
 if ($printView) {
     $statement = $pdo->prepare(
-        'SELECT id, full_name, area_of_operation, phone, email, status, created_at FROM members' . $where . " ORDER BY $orderBy"
+        'SELECT id, registration_number, full_name, area_of_operation, phone, email, status, created_at FROM members' . $where . " ORDER BY $orderBy"
     );
     $statement->execute($parameters);
     $members = $statement->fetchAll();
 } elseif (!$member) {
     $statement = $pdo->prepare(
-        'SELECT id, full_name, area_of_operation, phone, email, status, created_at FROM members' . $where . " ORDER BY $orderBy LIMIT $pageSize OFFSET $offset"
+        'SELECT id, registration_number, full_name, area_of_operation, phone, email, status, created_at FROM members' . $where . " ORDER BY $orderBy LIMIT $pageSize OFFSET $offset"
     );
     $statement->execute($parameters);
     $members = $statement->fetchAll();
@@ -243,7 +243,7 @@ $statusCounts = $statusCountsStatement->fetch() ?: ['total' => 0, 'active' => 0,
         <div class="page-title">
           <div>
             <h1>Member details</h1>
-            <p class="subtitle">Member record #<?= (int)$member['id'] ?></p>
+            <p class="subtitle">Registration number: <?= escape_value($member['registration_number']) ?></p>
           </div>
           <div class="actions no-print">
             <a class="button secondary" href="<?= escape_value($returnUrl) ?>">Back to list</a>
@@ -252,6 +252,7 @@ $statusCounts = $statusCountsStatement->fetch() ?: ['total' => 0, 'active' => 0,
         </div>
         <section class="panel">
           <dl class="details-grid">
+            <div class="detail"><dt>Registration number</dt><dd><?= escape_value($member['registration_number']) ?></dd></div>
             <div class="detail"><dt>Full name</dt><dd><?= escape_value($member['full_name']) ?></dd></div>
             <div class="detail"><dt>Area of operation</dt><dd><?= escape_value($member['area_of_operation']) ?></dd></div>
             <div class="detail"><dt>Phone number</dt><dd><?= escape_value($member['phone']) ?></dd></div>
@@ -282,7 +283,7 @@ $statusCounts = $statusCountsStatement->fetch() ?: ['total' => 0, 'active' => 0,
 
         <section class="panel no-print">
           <form class="filters" method="get" action="members.php">
-            <div class="field search"><label for="q">Search members</label><input id="q" name="q" type="search" value="<?= escape_value($search) ?>" placeholder="Name, phone, email or area" /></div>
+            <div class="field search"><label for="q">Search members</label><input id="q" name="q" type="search" value="<?= escape_value($search) ?>" placeholder="Registration number, name, phone, email or area" /></div>
             <div class="field area"><label for="area">Area of operation</label><input id="area" name="area" value="<?= escape_value($area) ?>" placeholder="Any area" /></div>
             <div class="field"><label for="status">Status</label><select id="status" name="status"><option value="">All statuses</option><option value="active" <?= $status === 'active' ? 'selected' : '' ?>>Active</option><option value="suspended" <?= $status === 'suspended' ? 'selected' : '' ?>>Suspended</option></select></div>
             <div class="field"><label for="from">Registered from</label><input id="from" name="from" type="date" value="<?= escape_value($from) ?>" /></div>
@@ -304,10 +305,11 @@ $statusCounts = $statusCountsStatement->fetch() ?: ['total' => 0, 'active' => 0,
         <?php else: ?>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Name</th><th>Area of operation</th><th>Phone</th><th>Email</th><th>Status</th><th>Registered</th><?php if (!$printView): ?><th class="no-print">Details</th><?php endif; ?></tr></thead>
+              <thead><tr><th>Registration number</th><th>Name</th><th>Area of operation</th><th>Phone</th><th>Email</th><th>Status</th><th>Registered</th><?php if (!$printView): ?><th class="no-print">Details</th><?php endif; ?></tr></thead>
               <tbody>
                 <?php foreach ($members as $row): ?>
                   <tr>
+                    <td><?= escape_value($row['registration_number']) ?></td>
                     <td class="member-name"><?= escape_value($row['full_name']) ?></td>
                     <td><?= escape_value($row['area_of_operation']) ?></td>
                     <td><?= escape_value($row['phone']) ?></td>
