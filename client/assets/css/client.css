@@ -1437,16 +1437,6 @@ a {
   border-bottom: 1px solid #e2e8f0;
 }
 
-.dashboard-header::after {
-  position: absolute;
-  right: clamp(20px, 5vw, 56px);
-  bottom: -1px;
-  left: clamp(20px, 5vw, 56px);
-  height: 2px;
-  background: linear-gradient(90deg, var(--hou-blue) 0%, var(--hou-cyan) 76%, var(--hou-orange) 100%);
-  content: "";
-}
-
 .dashboard-header .portal-brand {
   flex: 0 1 280px;
   min-width: 0;
