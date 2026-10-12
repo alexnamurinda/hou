@@ -42,3 +42,26 @@ CREATE TABLE IF NOT EXISTS member_announcements (
   PRIMARY KEY (id),
   KEY idx_member_announcements_visibility (status, published_at)
 ) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS member_profiles (
+  member_id BIGINT UNSIGNED NOT NULL,
+  district VARCHAR(120) NULL,
+  region VARCHAR(120) NULL,
+  street_address VARCHAR(180) NULL,
+  postal_address VARCHAR(180) NULL,
+  business_name VARCHAR(180) NULL,
+  trading_name VARCHAR(180) NULL,
+  business_registration_number VARCHAR(80) NULL,
+  tin VARCHAR(80) NULL,
+  business_certificate_path VARCHAR(255) NULL,
+  hotspot_count INT UNSIGNED NULL,
+  estimated_subscribers INT UNSIGNED NULL,
+  operation_areas VARCHAR(500) NULL,
+  current_isps VARCHAR(500) NULL,
+  national_id_number VARCHAR(80) NULL,
+  national_id_photo_path VARCHAR(255) NULL,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (member_id),
+  CONSTRAINT fk_member_profiles_member
+    FOREIGN KEY (member_id) REFERENCES members (id) ON DELETE CASCADE
+) ENGINE=InnoDB;
