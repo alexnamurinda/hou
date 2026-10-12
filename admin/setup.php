@@ -2,7 +2,6 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/../client/config.php';
 
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('X-Content-Type-Options: nosniff');
@@ -14,7 +13,6 @@ if (($_SESSION['hou_admin_authenticated'] ?? false) === true) {
     exit;
 }
 
-$pdo = db_connect();
 $configuredPasswordHash = admin_password_hash();
 $error = '';
 $success = false;
@@ -28,20 +26,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         $error = 'Admin password setup has already been completed. Sign in instead.';
     } else {
         $ipAddress = (string)($_SERVER['REMOTE_ADDR'] ?? 'unknown');
-        $attemptKey = hash('sha256', 'hou-admin-setup|' . $ipAddress);
-        if (random_int(1, 100) === 1) {
-            $pdo->exec('DELETE FROM auth_attempts WHERE attempted_at < DATE_SUB(NOW(), INTERVAL 1 DAY)');
-        }
-
-        $attempts = $pdo->prepare(
-            'SELECT COUNT(*) FROM auth_attempts WHERE attempt_key = ? AND attempted_at >= DATE_SUB(NOW(), INTERVAL 900 SECOND)'
-        );
-        $attempts->execute([$attemptKey]);
 
         $setupCode = $_POST['setup_code'] ?? null;
         $password = $_POST['password'] ?? null;
         $passwordConfirmation = $_POST['password_confirmation'] ?? null;
-        if ((int)$attempts->fetchColumn() >= 5) {
+        if (admin_auth_attempt_count('admin-setup', $ipAddress, 900) >= 5) {
             http_response_code(429);
             $error = 'Too many setup attempts. Please wait 15 minutes before trying again.';
         } elseif (
@@ -53,26 +42,37 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             || !is_string($passwordConfirmation)
             || !hash_equals($password, $passwordConfirmation)
         ) {
-            $pdo->prepare('INSERT INTO auth_attempts (attempt_key) VALUES (?)')->execute([$attemptKey]);
+            record_admin_auth_failure('admin-setup', $ipAddress);
             http_response_code(400);
             $error = 'Enter a valid setup code and matching password of at least 12 characters.';
         } else {
             $setupTokenHash = hash('sha256', $setupCode);
-            $update = $pdo->prepare(
-                'UPDATE admin_credentials
-                 SET password_hash = ?, setup_token_hash = NULL, setup_token_expires_at = NULL
-                 WHERE id = 1 AND password_hash IS NULL
-                   AND setup_token_hash = ? AND setup_token_expires_at > NOW()'
-            );
-            $update->execute([password_hash($password, PASSWORD_DEFAULT), $setupTokenHash]);
+            $setupSucceeded = admin_credentials_update(
+                static function (array &$credentials) use ($setupTokenHash, $password): bool {
+                    if (
+                        !empty($credentials['password_hash'])
+                        || !is_string($credentials['setup_token_hash'] ?? null)
+                        || !hash_equals($credentials['setup_token_hash'], $setupTokenHash)
+                        || !is_int($credentials['setup_token_expires_at'] ?? null)
+                        || $credentials['setup_token_expires_at'] <= time()
+                    ) {
+                        return false;
+                    }
 
-            if ($update->rowCount() !== 1) {
-                $pdo->prepare('INSERT INTO auth_attempts (attempt_key) VALUES (?)')->execute([$attemptKey]);
+                    $credentials['password_hash'] = password_hash($password, PASSWORD_DEFAULT);
+                    $credentials['setup_token_hash'] = null;
+                    $credentials['setup_token_expires_at'] = null;
+                    return true;
+                }
+            );
+
+            if (!$setupSucceeded) {
+                record_admin_auth_failure('admin-setup', $ipAddress);
                 http_response_code(400);
                 $error = 'The setup code is invalid or expired. Generate a new code on the server.';
             } else {
                 $success = true;
-                $configuredPasswordHash = admin_password_hash();
+                $configuredPasswordHash = true;
             }
         }
     }

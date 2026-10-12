@@ -2,7 +2,6 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/../client/config.php';
 
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('X-Content-Type-Options: nosniff');
@@ -22,20 +21,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         $error = 'Your session expired. Refresh and try again.';
     } elseif ($configuredPasswordHash === null) {
         http_response_code(503);
-        $error = 'Admin access has not been configured on the server.';
+        $error = 'Admin password is not configured. Generate a one-time setup code on the server first.';
     } else {
         $ipAddress = (string)($_SERVER['REMOTE_ADDR'] ?? 'unknown');
-        $attemptKey = hash('sha256', 'hou-admin-login|' . $ipAddress);
-        $pdo = db_connect();
-        if (random_int(1, 100) === 1) {
-            $pdo->exec('DELETE FROM auth_attempts WHERE attempted_at < DATE_SUB(NOW(), INTERVAL 1 DAY)');
-        }
-        $attempts = $pdo->prepare(
-            'SELECT COUNT(*) FROM auth_attempts WHERE attempt_key = ? AND attempted_at >= DATE_SUB(NOW(), INTERVAL 900 SECOND)'
-        );
-        $attempts->execute([$attemptKey]);
-
-        if ((int)$attempts->fetchColumn() >= 10) {
+        if (admin_auth_attempt_count('admin-login', $ipAddress, 900) >= 10) {
             http_response_code(429);
             $error = 'Too many sign-in attempts. Please wait 15 minutes before trying again.';
         } elseif (
@@ -43,7 +32,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             || strlen($_POST['password']) > 4096
             || !password_verify($_POST['password'], $configuredPasswordHash)
         ) {
-            $pdo->prepare('INSERT INTO auth_attempts (attempt_key) VALUES (?)')->execute([$attemptKey]);
+            record_admin_auth_failure('admin-login', $ipAddress);
             http_response_code(401);
             $error = 'The admin password is incorrect.';
         } else {

@@ -6,28 +6,30 @@ if (PHP_SAPI !== 'cli') {
     exit;
 }
 
-require_once __DIR__ . '/../client/config.php';
+require_once __DIR__ . '/auth.php';
 
-$pdo = db_connect();
-$pdo->beginTransaction();
+$setupCode = bin2hex(random_bytes(32));
+try {
+    $created = admin_credentials_update(
+        static function (array &$credentials) use ($setupCode): bool {
+            if (!empty($credentials['password_hash'])) {
+                return false;
+            }
 
-$credential = $pdo->query(
-    'SELECT password_hash FROM admin_credentials WHERE id = 1 FOR UPDATE'
-)->fetch();
-if (!$credential || $credential['password_hash'] !== null) {
-    $pdo->rollBack();
+            $credentials['setup_token_hash'] = hash('sha256', $setupCode);
+            $credentials['setup_token_expires_at'] = time() + 1800;
+            return true;
+        },
+        true
+    );
+} catch (Throwable $error) {
+    fwrite(STDERR, "Could not create the one-time setup code: " . $error->getMessage() . "\n");
+    exit(1);
+}
+if (!$created) {
     fwrite(STDERR, "Admin password is already configured; no setup code was created.\n");
     exit(1);
 }
-
-$setupCode = bin2hex(random_bytes(32));
-$update = $pdo->prepare(
-    'UPDATE admin_credentials
-     SET setup_token_hash = ?, setup_token_expires_at = DATE_ADD(NOW(), INTERVAL 30 MINUTE)
-     WHERE id = 1 AND password_hash IS NULL'
-);
-$update->execute([hash('sha256', $setupCode)]);
-$pdo->commit();
 
 fwrite(STDOUT, "One-time admin setup code (expires in 30 minutes):\n" . $setupCode . "\n");
 fwrite(STDOUT, "Open the admin setup page and enter this code. Do not share or save it in the repository.\n");
