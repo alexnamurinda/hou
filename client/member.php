@@ -19,7 +19,14 @@ $section = (string)($_GET['section'] ?? 'overview');
 if (!isset($sections[$section])) {
     $section = 'overview';
 }
-$profileQuery = db_connect()->prepare('SELECT * FROM member_profiles WHERE member_id = ? LIMIT 1');
+$profileQuery = db_connect()->prepare(
+    'SELECT member_id, district, region, street_address, postal_address, business_name, trading_name, '
+    . 'business_registration_number, tin, business_certificate_path, '
+    . '(business_certificate_data IS NOT NULL) AS has_business_certificate, '
+    . 'hotspot_count, estimated_subscribers, operation_areas, current_isps, national_id_number, '
+    . 'national_id_photo_path, (national_id_photo_data IS NOT NULL) AS has_national_id_photo '
+    . 'FROM member_profiles WHERE member_id = ? LIMIT 1'
+);
 $profileQuery->execute([$member['id']]);
 $profile = $profileQuery->fetch() ?: [];
 $profileSections = [
@@ -40,7 +47,7 @@ $overviewFields = [
         'Trading name' => 'trading_name',
         'Registration number' => 'business_registration_number',
         'TIN' => 'tin',
-        'Certificate of registration' => 'business_certificate_path',
+        'Certificate of registration' => 'has_business_certificate',
     ],
     'Network' => [
         'Number of hotspots' => 'hotspot_count',
@@ -50,7 +57,7 @@ $overviewFields = [
     ],
     'Citizenship' => [
         'Card number' => 'national_id_number',
-        'National ID photo' => 'national_id_photo_path',
+        'National ID photo' => 'has_national_id_photo',
     ],
 ];
 $completedSections = 0;
@@ -195,7 +202,13 @@ header('X-Content-Type-Options: nosniff');
                   <?php foreach ($fields as $label => $field): ?>
                     <?php
                     $value = $profile[$field] ?? null;
-                    if (str_ends_with($field, '_path')) {
+                    if (str_starts_with($field, 'has_')) {
+                        $legacyPath = match ($field) {
+                            'has_business_certificate' => 'business_certificate_path',
+                            'has_national_id_photo' => 'national_id_photo_path',
+                        };
+                        $value = !empty($profile[$field]) || !empty($profile[$legacyPath]) ? 'Uploaded' : null;
+                    } elseif (str_ends_with($field, '_path')) {
                         $value = $value ? 'Uploaded' : null;
                     }
                     ?>
@@ -224,7 +237,13 @@ header('X-Content-Type-Options: nosniff');
               <?php foreach ($category as $label => $field): ?>
                 <?php
                 $value = $profile[$field] ?? null;
-                if (str_ends_with($field, '_path')) {
+                if (str_starts_with($field, 'has_')) {
+                    $legacyPath = match ($field) {
+                        'has_business_certificate' => 'business_certificate_path',
+                        'has_national_id_photo' => 'national_id_photo_path',
+                    };
+                    $value = !empty($profile[$field]) || !empty($profile[$legacyPath]) ? 'Uploaded' : null;
+                } elseif (str_ends_with($field, '_path')) {
                     $value = $value ? 'Uploaded' : null;
                 }
                 ?>
@@ -318,7 +337,7 @@ header('X-Content-Type-Options: nosniff');
                     </label>
                     <label class="onboarding-field-wide">Certificate of registration <span>(optional, PDF/JPG/PNG up to 5 MB)</span>
                       <input name="business_certificate" type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" />
-                      <?php if (!empty($profile['business_certificate_path'])): ?><small>A certificate is already saved. Upload a new file to replace it.</small><?php endif; ?>
+                      <?php if (!empty($profile['has_business_certificate']) || !empty($profile['business_certificate_path'])): ?><small>A certificate is already saved. Upload a new file to replace it.</small><?php endif; ?>
                     </label>
                   </div>
                 </section>
@@ -351,7 +370,7 @@ header('X-Content-Type-Options: nosniff');
                     </label>
                     <label class="onboarding-field-wide">National ID photo <span>(optional, JPG/PNG up to 5 MB)</span>
                       <input name="national_id_photo" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" />
-                      <?php if (!empty($profile['national_id_photo_path'])): ?><small>A national ID photo is already saved. Upload a new file to replace it.</small><?php endif; ?>
+                      <?php if (!empty($profile['has_national_id_photo']) || !empty($profile['national_id_photo_path'])): ?><small>A national ID photo is already saved. Upload a new file to replace it.</small><?php endif; ?>
                     </label>
                   </div>
                 </section>

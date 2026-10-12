@@ -48,9 +48,9 @@ function profile_upload(string $field, bool $imageOnly): ?array
 
     $mimeType = (new finfo(FILEINFO_MIME_TYPE))->file($upload['tmp_name']);
     $allowedTypes = $imageOnly
-        ? ['image/jpeg' => 'jpg', 'image/png' => 'png']
-        : ['application/pdf' => 'pdf', 'image/jpeg' => 'jpg', 'image/png' => 'png'];
-    if (!is_string($mimeType) || !isset($allowedTypes[$mimeType])) {
+        ? ['image/jpeg', 'image/png']
+        : ['application/pdf', 'image/jpeg', 'image/png'];
+    if (!is_string($mimeType) || !in_array($mimeType, $allowedTypes, true)) {
         respond_json(422, [
             'success' => false,
             'message' => $imageOnly
@@ -59,40 +59,15 @@ function profile_upload(string $field, bool $imageOnly): ?array
         ]);
     }
 
-    $directory = dirname(__DIR__, 2) . '/private_uploads';
-    if (!is_dir($directory) && !mkdir($directory, 0700, true) && !is_dir($directory)) {
-        error_log('HOU profile upload directory could not be created.');
-        respond_json(503, ['success' => false, 'message' => 'Document storage is unavailable. Please try again later.']);
-    }
-
-    $filename = bin2hex(random_bytes(24)) . '.' . $allowedTypes[$mimeType];
-    $absolutePath = $directory . '/' . $filename;
-    error_clear_last();
-    $stored = @move_uploaded_file($upload['tmp_name'], $absolutePath);
-    $moveError = error_get_last();
-    if (!$stored) {
-        error_clear_last();
-        $stored = @copy($upload['tmp_name'], $absolutePath);
-        $copyError = error_get_last();
-    } else {
-        $copyError = null;
-    }
-
-    if (!$stored || !is_file($absolutePath) || filesize($absolutePath) !== (int)$upload['size']) {
-        if (is_file($absolutePath) && !unlink($absolutePath)) {
-            error_log('HOU incomplete profile upload could not be removed: ' . $absolutePath);
-        }
-        error_log(
-            'HOU profile document could not be saved. Destination writable: '
-            . (is_writable($directory) ? 'yes' : 'no')
-            . '; move error: ' . ($moveError['message'] ?? 'none')
-            . '; copy error: ' . ($copyError['message'] ?? 'none')
-        );
-        respond_json(503, ['success' => false, 'message' => 'The document could not be saved. Please try again.']);
+    $data = file_get_contents($upload['tmp_name']);
+    if (!is_string($data) || strlen($data) !== (int)$upload['size']) {
+        error_log('HOU profile upload could not be read completely from PHP temporary storage.');
+        respond_json(503, ['success' => false, 'message' => 'The document could not be read. Please try again.']);
     }
 
     return [
-        'path' => 'private_uploads/' . $filename,
+        'data' => $data,
+        'mime' => $mimeType,
     ];
 }
 
@@ -101,9 +76,6 @@ if (!is_string($step)) {
     respond_json(422, ['success' => false, 'message' => 'Invalid onboarding step.']);
 }
 $pdo = db_connect();
-$profileQuery = $pdo->prepare('SELECT business_certificate_path, national_id_photo_path FROM member_profiles WHERE member_id = ?');
-$profileQuery->execute([$member['id']]);
-$existingProfile = $profileQuery->fetch() ?: [];
 
 switch ($step) {
     case 'address':
@@ -123,7 +95,8 @@ switch ($step) {
         ];
         $upload = profile_upload('business_certificate', false);
         if ($upload !== null) {
-            $values['business_certificate_path'] = $upload['path'];
+            $values['business_certificate_data'] = $upload['data'];
+            $values['business_certificate_mime'] = $upload['mime'];
         }
         break;
     case 'network':
@@ -145,7 +118,8 @@ switch ($step) {
         $values = ['national_id_number' => profile_text('national_id_number', 80, true)];
         $upload = profile_upload('national_id_photo', true);
         if ($upload !== null) {
-            $values['national_id_photo_path'] = $upload['path'];
+            $values['national_id_photo_data'] = $upload['data'];
+            $values['national_id_photo_mime'] = $upload['mime'];
         }
         break;
     default:
@@ -161,17 +135,20 @@ $updates = implode(', ', array_map(
 ));
 $sql = 'INSERT INTO member_profiles (' . implode(', ', $insertColumns) . ') VALUES (' . $placeholders . ') '
     . 'ON DUPLICATE KEY UPDATE ' . $updates;
-$statement = $pdo->prepare($sql);
-$statement->execute(array_merge([$member['id']], array_values($values)));
-
-if (isset($upload)) {
-    $previousPath = $existingProfile[$step === 'business' ? 'business_certificate_path' : 'national_id_photo_path'] ?? null;
-    if (is_string($previousPath) && preg_match('~^private_uploads/[a-f0-9]{48}\.(?:pdf|jpg|png)$~', $previousPath)) {
-        $previousAbsolutePath = dirname(__DIR__, 2) . '/' . $previousPath;
-        if (is_file($previousAbsolutePath) && !unlink($previousAbsolutePath)) {
-            error_log('HOU previous profile document could not be removed: ' . $previousPath);
-        }
+try {
+    $statement = $pdo->prepare($sql);
+    $statement->bindValue(1, $member['id'], PDO::PARAM_INT);
+    foreach ($columns as $index => $column) {
+        $value = $values[$column];
+        $parameterType = str_ends_with($column, '_data')
+            ? PDO::PARAM_LOB
+            : (is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        $statement->bindValue($index + 2, $value, $parameterType);
     }
+    $statement->execute();
+} catch (PDOException $error) {
+    error_log('HOU member profile save failed: ' . $error->getMessage());
+    respond_json(503, ['success' => false, 'message' => 'We could not save your profile right now. Please try again.']);
 }
 
 respond_json(200, ['success' => true]);

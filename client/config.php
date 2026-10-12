@@ -99,18 +99,48 @@ function ensure_member_tables(PDO $pdo): void
             business_registration_number VARCHAR(80) NULL,
             tin VARCHAR(80) NULL,
             business_certificate_path VARCHAR(255) NULL,
+            business_certificate_data MEDIUMBLOB NULL,
+            business_certificate_mime VARCHAR(100) NULL,
             hotspot_count INT UNSIGNED NULL,
             estimated_subscribers INT UNSIGNED NULL,
             operation_areas VARCHAR(500) NULL,
             current_isps VARCHAR(500) NULL,
             national_id_number VARCHAR(80) NULL,
             national_id_photo_path VARCHAR(255) NULL,
+            national_id_photo_data MEDIUMBLOB NULL,
+            national_id_photo_mime VARCHAR(100) NULL,
             updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (member_id),
             CONSTRAINT fk_member_profiles_member
                 FOREIGN KEY (member_id) REFERENCES members (id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
+    ensure_member_profile_upload_columns($pdo);
+}
+
+function ensure_member_profile_upload_columns(PDO $pdo): void
+{
+    $columns = $pdo->query('SHOW COLUMNS FROM member_profiles')->fetchAll(PDO::FETCH_COLUMN);
+    $existingColumns = array_fill_keys($columns, true);
+    $uploadColumns = [
+        'business_certificate_data' => 'MEDIUMBLOB NULL',
+        'business_certificate_mime' => 'VARCHAR(100) NULL',
+        'national_id_photo_data' => 'MEDIUMBLOB NULL',
+        'national_id_photo_mime' => 'VARCHAR(100) NULL',
+    ];
+
+    foreach ($uploadColumns as $column => $definition) {
+        if (!isset($existingColumns[$column])) {
+            try {
+                $pdo->exec('ALTER TABLE member_profiles ADD COLUMN ' . $column . ' ' . $definition);
+            } catch (PDOException $error) {
+                $columns = $pdo->query('SHOW COLUMNS FROM member_profiles')->fetchAll(PDO::FETCH_COLUMN);
+                if (!in_array($column, $columns, true)) {
+                    throw $error;
+                }
+            }
+        }
+    }
 }
 
 function generate_member_registration_number(): string
