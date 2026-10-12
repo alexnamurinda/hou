@@ -10,8 +10,6 @@ unset($_SESSION['registration_notice']);
 $sections = [
     'overview' => ['Overview', 'fa-house'],
     'onboarding' => ['Onboarding', 'fa-clipboard-list'],
-    'address' => ['Address', 'fa-location-dot'],
-    'business' => ['Business', 'fa-building'],
     'network' => ['Network', 'fa-wifi'],
     'citizenship' => ['Citizenship', 'fa-briefcase'],
     'payments' => ['Payments & Invoices', 'fa-circle-dollar-to-slot'],
@@ -188,6 +186,7 @@ header('X-Content-Type-Options: nosniff');
 
           <div class="profile-overview-grid">
             <?php foreach ($overviewFields as $group => $fields): ?>
+              <?php if ($group === 'Network' || $group === 'Citizenship') continue; ?>
               <section class="dashboard-panel profile-overview-panel">
                 <div class="profile-overview-heading">
                   <h2><?= escape_html($group) ?></h2>
@@ -214,10 +213,32 @@ header('X-Content-Type-Options: nosniff');
             <h2 id="recent-payments-heading">Recent payments</h2>
             <p>No payments yet.</p>
           </section>
+        <?php elseif ($section === 'network' || $section === 'citizenship'): ?>
+          <?php $category = $overviewFields[$sections[$section][0]]; ?>
+          <div class="dashboard-page-heading">
+            <h1><?= escape_html($sections[$section][0]) ?></h1>
+            <p>Your saved <?= strtolower(escape_html($sections[$section][0])) ?> information.</p>
+          </div>
+          <section class="dashboard-panel profile-overview-panel">
+            <dl class="profile-overview-details">
+              <?php foreach ($category as $label => $field): ?>
+                <?php
+                $value = $profile[$field] ?? null;
+                if (str_ends_with($field, '_path')) {
+                    $value = $value ? 'Uploaded' : null;
+                }
+                ?>
+                <div>
+                  <dt><?= escape_html($label) ?></dt>
+                  <dd><?= $value !== null && $value !== '' ? escape_html((string)$value) : 'Not set' ?></dd>
+                </div>
+              <?php endforeach; ?>
+            </dl>
+          </section>
         <?php elseif ($section === 'profile'): ?>
           <div class="dashboard-page-heading">
             <h1>Profile</h1>
-            <p>View and edit your saved membership details. Choose a category to make changes.</p>
+            <p>Manage yourmembership details. Choose a category to make changes.</p>
           </div>
           <div class="profile-overview-grid">
             <?php foreach ($overviewFields as $group => $fields): ?>

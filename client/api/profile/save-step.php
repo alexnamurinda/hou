@@ -67,8 +67,27 @@ function profile_upload(string $field, bool $imageOnly): ?array
 
     $filename = bin2hex(random_bytes(24)) . '.' . $allowedTypes[$mimeType];
     $absolutePath = $directory . '/' . $filename;
-    if (!move_uploaded_file($upload['tmp_name'], $absolutePath)) {
-        error_log('HOU profile document could not be moved into protected storage.');
+    error_clear_last();
+    $stored = @move_uploaded_file($upload['tmp_name'], $absolutePath);
+    $moveError = error_get_last();
+    if (!$stored) {
+        error_clear_last();
+        $stored = @copy($upload['tmp_name'], $absolutePath);
+        $copyError = error_get_last();
+    } else {
+        $copyError = null;
+    }
+
+    if (!$stored || !is_file($absolutePath) || filesize($absolutePath) !== (int)$upload['size']) {
+        if (is_file($absolutePath) && !unlink($absolutePath)) {
+            error_log('HOU incomplete profile upload could not be removed: ' . $absolutePath);
+        }
+        error_log(
+            'HOU profile document could not be saved. Destination writable: '
+            . (is_writable($directory) ? 'yes' : 'no')
+            . '; move error: ' . ($moveError['message'] ?? 'none')
+            . '; copy error: ' . ($copyError['message'] ?? 'none')
+        );
         respond_json(503, ['success' => false, 'message' => 'The document could not be saved. Please try again.']);
     }
 
