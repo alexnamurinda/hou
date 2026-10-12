@@ -2,10 +2,13 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../client/config.php';
+require_once __DIR__ . '/auth.php';
 
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('X-Content-Type-Options: nosniff');
 header('X-Robots-Tag: noindex, nofollow, noarchive');
+require_admin();
+$adminCsrfToken = admin_csrf_token();
 
 function escape_value(string $value): string
 {
@@ -82,12 +85,25 @@ $returnQuery = array_filter([
 $returnUrl = 'members.php' . ($returnQuery ? '?' . http_build_query($returnQuery) : '');
 
 $member = null;
+$memberProfile = null;
 if ($memberId !== false && $memberId !== null) {
     $statement = $pdo->prepare(
         'SELECT id, registration_number, full_name, area_of_operation, phone, email, status, created_at, updated_at FROM members WHERE id = ? LIMIT 1'
     );
     $statement->execute([$memberId]);
     $member = $statement->fetch();
+    if ($member) {
+        $profileStatement = $pdo->prepare(
+            'SELECT district, region, street_address, postal_address, business_name, trading_name, '
+            . 'business_registration_number, tin, '
+            . 'hotspot_count, estimated_subscribers, operation_areas, current_isps, national_id_number, '
+            . '(business_certificate_data IS NOT NULL) AS has_business_certificate, business_certificate_mime, business_certificate_path, '
+            . '(national_id_photo_data IS NOT NULL) AS has_national_id_photo, national_id_photo_mime, national_id_photo_path '
+            . 'FROM member_profiles WHERE member_id = ? LIMIT 1'
+        );
+        $profileStatement->execute([$memberId]);
+        $memberProfile = $profileStatement->fetch() ?: [];
+    }
 }
 
 $countStatement = $pdo->prepare('SELECT COUNT(*) FROM members' . $where);
@@ -181,6 +197,19 @@ $statusCounts = $statusCountsStatement->fetch() ?: ['total' => 0, 'active' => 0,
     .detail{padding:16px 0;border-bottom:1px solid #e2e8f0}
     .detail dt{margin-bottom:6px;color:#64748b;font-size:12px;font-weight:700}
     .detail dd{margin:0;color:#0f172a;font-size:15px;font-weight:600;overflow-wrap:anywhere}
+    .section-title{margin:0 0 4px;color:#0f172a;font-size:18px}
+    .section-subtitle{margin:0 0 12px;color:#64748b;font-size:13px;line-height:1.5}
+    .document-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .document-card{min-width:0;padding:16px;border:1px solid #e2e8f0;border-radius:12px;background:#f8fafc}
+    .document-card h3{margin:0 0 12px;color:#0f172a;font-size:14px}
+    .document-preview{display:grid;min-height:180px;max-height:440px;place-items:center;overflow:hidden;background:#fff;border:1px solid #e2e8f0;border-radius:8px}
+    .document-preview img{display:block;max-width:100%;max-height:420px;object-fit:contain}
+    .document-preview iframe{display:block;width:100%;height:420px;border:0}
+    .document-actions{display:flex;gap:12px;margin-top:12px;font-size:13px;font-weight:700}
+    .document-empty{padding:18px;color:#64748b;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:10px;font-size:13px}
+    .admin-logout{padding:8px 12px;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.35);border-radius:8px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+    .admin-logout:hover{background:rgba(255,255,255,.12)}
+    .admin-header-actions{display:flex;align-items:center;gap:12px}
     .print-heading{display:none}
     @media(max-width:1000px){.filters{grid-template-columns:repeat(4,minmax(0,1fr))}}
     @media(max-width:620px){
@@ -199,12 +228,13 @@ $statusCounts = $statusCountsStatement->fetch() ?: ['total' => 0, 'active' => 0,
       .filters .field.search,.filters .field.area{grid-column:span 2}
       .filters .button{padding:0 10px}
       .details-grid{grid-template-columns:1fr}
+      .document-grid{grid-template-columns:1fr}
       .pagination{align-items:flex-start;flex-direction:column}
     }
     @media print{
       @page{size:landscape;margin:14mm}
       body{min-width:0;background:#fff;color:#111}
-      .topbar,.warning,.no-print,.stats{display:none!important}
+      .topbar,.no-print,.stats{display:none!important}
       main{width:100%;margin:0}
       .print-heading{display:block;margin-bottom:16px}
       h1{font-size:22px}
@@ -223,15 +253,16 @@ $statusCounts = $statusCountsStatement->fetch() ?: ['total' => 0, 'active' => 0,
 <body>
   <header class="topbar no-print">
     <a class="brand" href="../index.php"><img src="../images/hou_logo.png" alt="" /><span>HOU Admin</span></a>
-    <a class="back" href="../index.php">Back to website</a>
+    <div class="admin-header-actions">
+      <a class="back" href="../index.php">Back to website</a>
+      <form method="post" action="logout.php">
+        <input type="hidden" name="csrf_token" value="<?= escape_value($adminCsrfToken) ?>" />
+        <button class="admin-logout" type="submit">Log out</button>
+      </form>
+    </div>
   </header>
 
   <main>
-    <div class="warning no-print">
-      <strong>Admin directory — currently not access-protected</strong>
-      Anyone who can reach this URL can view member records. Do not publish this page on a public production server until access control is added.
-    </div>
-
     <?php if ($memberId !== false && $memberId !== null): ?>
       <?php if (!$member): ?>
         <section class="panel">
@@ -261,6 +292,102 @@ $statusCounts = $statusCountsStatement->fetch() ?: ['total' => 0, 'active' => 0,
             <div class="detail"><dt>Registered</dt><dd><?= escape_value(date('F j, Y \a\t g:i A', strtotime($member['created_at']))) ?></dd></div>
             <div class="detail"><dt>Last record update</dt><dd><?= escape_value(date('F j, Y \a\t g:i A', strtotime($member['updated_at']))) ?></dd></div>
           </dl>
+        </section>
+        <?php
+        $profileGroups = [
+            'Address' => [
+                'District' => 'district',
+                'Region' => 'region',
+                'Street address' => 'street_address',
+                'Postal address' => 'postal_address',
+            ],
+            'Business' => [
+                'Business name' => 'business_name',
+                'Trading name' => 'trading_name',
+                'Registration number' => 'business_registration_number',
+                'TIN' => 'tin',
+            ],
+            'Network' => [
+                'Number of hotspots' => 'hotspot_count',
+                'Estimated subscribers' => 'estimated_subscribers',
+                'Operation areas' => 'operation_areas',
+                'Current ISPs' => 'current_isps',
+            ],
+            'Citizenship' => [
+                'National ID card number' => 'national_id_number',
+            ],
+        ];
+        ?>
+        <?php foreach ($profileGroups as $group => $fields): ?>
+          <section class="panel">
+            <h2 class="section-title"><?= escape_value($group) ?></h2>
+            <p class="section-subtitle"><?= escape_value($group) ?> information submitted by the member.</p>
+            <dl class="details-grid">
+              <?php foreach ($fields as $label => $field): ?>
+                <?php $value = $memberProfile[$field] ?? null; ?>
+                <div class="detail">
+                  <dt><?= escape_value($label) ?></dt>
+                  <dd><?= $value !== null && $value !== '' ? escape_value((string)$value) : 'Not provided' ?></dd>
+                </div>
+              <?php endforeach; ?>
+            </dl>
+          </section>
+        <?php endforeach; ?>
+        <section class="panel">
+          <h2 class="section-title">Submitted documents</h2>
+          <p class="section-subtitle">Documents are visible only to authenticated administrators.</p>
+          <div class="document-grid">
+            <?php
+            $documents = [
+                'business_certificate' => [
+                    'title' => 'Certificate of registration',
+                    'has_data' => !empty($memberProfile['has_business_certificate']),
+                    'path' => $memberProfile['business_certificate_path'] ?? null,
+                    'mime' => $memberProfile['business_certificate_mime'] ?? null,
+                    'type' => 'certificate',
+                ],
+                'national_id_photo' => [
+                    'title' => 'National ID photo',
+                    'has_data' => !empty($memberProfile['has_national_id_photo']),
+                    'path' => $memberProfile['national_id_photo_path'] ?? null,
+                    'mime' => $memberProfile['national_id_photo_mime'] ?? null,
+                    'type' => 'national-id',
+                ],
+            ];
+            ?>
+            <?php foreach ($documents as $document): ?>
+              <?php
+              $legacyPath = $document['path'];
+              $legacyMime = null;
+              if (is_string($legacyPath) && preg_match('/\.(pdf|jpg|png)$/', $legacyPath, $extensionMatch)) {
+                  $legacyMime = ['pdf' => 'application/pdf', 'jpg' => 'image/jpeg', 'png' => 'image/png'][$extensionMatch[1]];
+              }
+              $documentMime = $document['mime'] ?: $legacyMime;
+              $hasDocument = $document['has_data'] || $legacyPath !== null;
+              $documentUrl = 'member-document.php?' . http_build_query([
+                  'member' => (string)$member['id'],
+                  'type' => $document['type'],
+              ]);
+              ?>
+              <article class="document-card">
+                <h3><?= escape_value($document['title']) ?></h3>
+                <?php if ($hasDocument && in_array($documentMime, ['application/pdf', 'image/jpeg', 'image/png'], true)): ?>
+                  <div class="document-preview">
+                    <?php if ($documentMime === 'application/pdf'): ?>
+                      <iframe src="<?= escape_value($documentUrl) ?>" title="<?= escape_value($document['title']) ?>"></iframe>
+                    <?php else: ?>
+                      <img src="<?= escape_value($documentUrl) ?>" alt="<?= escape_value($document['title']) ?>" />
+                    <?php endif; ?>
+                  </div>
+                  <div class="document-actions">
+                    <a href="<?= escape_value($documentUrl) ?>" target="_blank" rel="noopener">Open document</a>
+                  </div>
+                <?php else: ?>
+                  <div class="document-empty">No document submitted.</div>
+                <?php endif; ?>
+              </article>
+            <?php endforeach; ?>
+          </div>
         </section>
       <?php endif; ?>
     <?php else: ?>
