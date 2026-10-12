@@ -186,6 +186,30 @@ header('X-Content-Type-Options: nosniff');
           </section>
           <?php endif; ?>
 
+          <div class="profile-overview-grid">
+            <?php foreach ($overviewFields as $group => $fields): ?>
+              <section class="dashboard-panel profile-overview-panel">
+                <div class="profile-overview-heading">
+                  <h2><?= escape_html($group) ?></h2>
+                </div>
+                <dl class="profile-overview-details">
+                  <?php foreach ($fields as $label => $field): ?>
+                    <?php
+                    $value = $profile[$field] ?? null;
+                    if (str_ends_with($field, '_path')) {
+                        $value = $value ? 'Uploaded' : null;
+                    }
+                    ?>
+                    <div>
+                      <dt><?= escape_html($label) ?></dt>
+                      <dd><?= $value !== null && $value !== '' ? escape_html((string)$value) : 'Not set' ?></dd>
+                    </div>
+                  <?php endforeach; ?>
+                </dl>
+              </section>
+            <?php endforeach; ?>
+          </div>
+
           <section class="dashboard-panel recent-payments" aria-labelledby="recent-payments-heading">
             <h2 id="recent-payments-heading">Recent payments</h2>
             <p>No payments yet.</p>
