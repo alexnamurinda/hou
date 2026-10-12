@@ -10,7 +10,13 @@
   const nextButton = form.querySelector('[data-onboarding-next]');
   const stepLabel = form.querySelector('[data-onboarding-step-label]');
   const feedback = form.querySelector('[data-onboarding-feedback]');
-  let activeIndex = Math.min(Number(form.dataset.initialStep) || 0, steps.length - 1);
+  const editOnly = form.dataset.editOnly === 'true';
+  const returnSection = form.dataset.returnSection === 'profile' ? 'profile' : 'overview';
+  let activeIndex = Math.max(0, Math.min(Number(form.dataset.initialStep) || 0, steps.length - 1));
+
+  if (editOnly) {
+    document.querySelector('.onboarding-stepper').hidden = true;
+  }
 
   function renderStep() {
     steps.forEach((step, index) => {
@@ -20,9 +26,10 @@
       item.classList.toggle('is-active', index === activeIndex);
       item.classList.toggle('is-complete', index < activeIndex);
     });
-    backButton.hidden = activeIndex === 0;
+    backButton.hidden = !editOnly && activeIndex === 0;
+    backButton.textContent = editOnly ? 'Cancel' : '← Back';
     stepLabel.textContent = `Step ${activeIndex + 1} of ${steps.length}`;
-    nextButton.textContent = activeIndex === steps.length - 1 ? 'Done' : 'Next →';
+    nextButton.textContent = editOnly ? 'Save changes' : activeIndex === steps.length - 1 ? 'Done' : 'Next →';
     feedback.hidden = true;
     feedback.textContent = '';
   }
@@ -61,8 +68,8 @@
         throw new Error(result.message || 'Unable to save this step. Please try again.');
       }
 
-      if (activeIndex === steps.length - 1) {
-        window.location.assign('member.php?section=overview');
+      if (editOnly || activeIndex === steps.length - 1) {
+        window.location.assign(`member.php?section=${returnSection}`);
       } else {
         activeIndex += 1;
         renderStep();
@@ -87,6 +94,10 @@
   });
 
   backButton.addEventListener('click', () => {
+    if (editOnly) {
+      window.location.assign(`member.php?section=${returnSection}`);
+      return;
+    }
     if (activeIndex > 0) {
       activeIndex -= 1;
       renderStep();

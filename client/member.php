@@ -30,6 +30,31 @@ $profileSections = [
     'Network' => ['hotspot_count', 'estimated_subscribers', 'operation_areas', 'current_isps'],
     'Citizenship' => ['national_id_number'],
 ];
+$overviewFields = [
+    'Address' => [
+        'District' => 'district',
+        'Region' => 'region',
+        'Street address' => 'street_address',
+        'Postal address' => 'postal_address',
+    ],
+    'Business' => [
+        'Business name' => 'business_name',
+        'Trading name' => 'trading_name',
+        'Registration number' => 'business_registration_number',
+        'TIN' => 'tin',
+        'Certificate of registration' => 'business_certificate_path',
+    ],
+    'Network' => [
+        'Number of hotspots' => 'hotspot_count',
+        'Estimated subscribers' => 'estimated_subscribers',
+        'Operation areas' => 'operation_areas',
+        'Current ISPs' => 'current_isps',
+    ],
+    'Citizenship' => [
+        'Card number' => 'national_id_number',
+        'National ID photo' => 'national_id_photo_path',
+    ],
+];
 $completedSections = 0;
 foreach ($profileSections as $fields) {
     $isComplete = true;
@@ -48,8 +73,19 @@ $onboardingSteps = [
     'network' => ['Network', 'fa-wifi'],
     'citizenship' => ['Citizenship', 'fa-briefcase'],
 ];
+$editStep = (string)($_GET['edit'] ?? '');
+if (!isset($onboardingSteps[$editStep])) {
+    $editStep = '';
+}
 $initialStep = 0;
 foreach (array_keys($onboardingSteps) as $stepIndex => $stepKey) {
+    if ($editStep !== '') {
+        if ($stepKey === $editStep) {
+            $initialStep = $stepIndex;
+            break;
+        }
+        continue;
+    }
     $requiredField = match ($stepKey) {
         'address' => 'district',
         'business' => 'business_name',
@@ -77,7 +113,7 @@ header('X-Content-Type-Options: nosniff');
   <link rel="icon" type="image/png" href="../images/hou_logo.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/client.css?v=20261012-5" />
+  <link rel="stylesheet" href="assets/css/client.css?v=20261012-6" />
 </head>
 <body class="portal-dashboard-body">
   <div class="portal-shell">
@@ -97,10 +133,12 @@ header('X-Content-Type-Options: nosniff');
 
     <div class="dashboard-layout">
       <aside class="dashboard-sidebar" aria-label="Member portal navigation">
+        <?php if ($completedSections < count($profileSections)): ?>
         <div class="profile-progress-card">
           <div><span>Profile setup</span><strong><?= $completedSections ?>/4</strong></div>
           <span class="profile-progress-track"><span style="width: <?= $progressPercent ?>%"></span></span>
         </div>
+        <?php endif; ?>
         <nav class="dashboard-nav">
           <?php foreach ($sections as $key => [$label, $icon]): ?>
             <a class="dashboard-nav-link<?= $section === $key ? ' is-active' : '' ?>"
@@ -134,67 +172,37 @@ header('X-Content-Type-Options: nosniff');
             <p class="dashboard-member-id">Registration number: <?= escape_html($member['registration_number']) ?></p>
           </div>
 
+          <?php if ($completedSections < count($profileSections)): ?>
           <section class="complete-profile-card" aria-labelledby="complete-profile-heading">
             <div class="complete-profile-copy">
               <h2 id="complete-profile-heading">Complete your profile</h2>
               <p>You've completed <?= $completedSections ?> of 4 sections. Finish setting up your membership to get the most out of HOU.</p>
             </div>
-            <a class="onboarding-button" href="member.php?section=onboarding"><?= $completedSections === 4 ? 'Review profile' : 'Continue onboarding' ?> <span aria-hidden="true">→</span></a>
+            <a class="onboarding-button" href="member.php?section=onboarding">Continue onboarding <span aria-hidden="true">→</span></a>
             <div class="complete-profile-progress">
               <span class="complete-profile-track"><span style="width: <?= $progressPercent ?>%"></span></span>
               <strong><?= $progressPercent ?>%</strong>
             </div>
           </section>
+          <?php endif; ?>
 
-          <section class="overview-status-grid" aria-label="Profile section status">
-            <?php foreach ($profileSections as $statusLabel => $fields): ?>
-              <?php
-              $isComplete = true;
-              foreach ($fields as $field) {
-                  if (!isset($profile[$field]) || $profile[$field] === '') {
-                      $isComplete = false;
-                      break;
-                  }
-              }
-              ?>
-              <article class="overview-status-card">
-                <span><?= escape_html($statusLabel) ?></span>
-                <strong><?= $isComplete ? 'Complete' : 'In progress' ?></strong>
-              </article>
-            <?php endforeach; ?>
+          <section class="dashboard-panel recent-payments" aria-labelledby="recent-payments-heading">
+            <h2 id="recent-payments-heading">Recent payments</h2>
+            <p>No payments yet.</p>
           </section>
-
+        <?php elseif ($section === 'profile'): ?>
+          <div class="dashboard-page-heading">
+            <h1>Profile</h1>
+            <p>View and edit your saved membership details. Choose a category to make changes.</p>
+          </div>
           <div class="profile-overview-grid">
-            <?php
-            $overviewFields = [
-                'Address' => [
-                    'District' => 'district',
-                    'Region' => 'region',
-                    'Street address' => 'street_address',
-                    'Postal address' => 'postal_address',
-                ],
-                'Business' => [
-                    'Business name' => 'business_name',
-                    'Trading name' => 'trading_name',
-                    'Registration number' => 'business_registration_number',
-                    'TIN' => 'tin',
-                    'Certificate of registration' => 'business_certificate_path',
-                ],
-                'Network' => [
-                    'Number of hotspots' => 'hotspot_count',
-                    'Estimated subscribers' => 'estimated_subscribers',
-                    'Operation areas' => 'operation_areas',
-                    'Current ISPs' => 'current_isps',
-                ],
-                'Citizenship' => [
-                    'Card number' => 'national_id_number',
-                    'National ID photo' => 'national_id_photo_path',
-                ],
-            ];
-            ?>
             <?php foreach ($overviewFields as $group => $fields): ?>
+              <?php $editKey = strtolower($group); ?>
               <section class="dashboard-panel profile-overview-panel">
-                <h2><?= escape_html($group) ?></h2>
+                <div class="profile-overview-heading">
+                  <h2><?= escape_html($group) ?></h2>
+                  <a class="profile-edit-link" href="member.php?section=onboarding&amp;edit=<?= escape_html($editKey) ?>&amp;return=profile">Edit <span aria-hidden="true">→</span></a>
+                </div>
                 <dl class="profile-overview-details">
                   <?php foreach ($fields as $label => $field): ?>
                     <?php
@@ -212,11 +220,6 @@ header('X-Content-Type-Options: nosniff');
               </section>
             <?php endforeach; ?>
           </div>
-
-          <section class="dashboard-panel recent-payments" aria-labelledby="recent-payments-heading">
-            <h2 id="recent-payments-heading">Recent payments</h2>
-            <p>No payments yet.</p>
-          </section>
         <?php else: ?>
           <div class="dashboard-page-heading">
             <h1><?= escape_html($sections[$section][0]) ?></h1>
@@ -232,7 +235,7 @@ header('X-Content-Type-Options: nosniff');
               <?php endforeach; ?>
             </div>
             <div class="dashboard-panel onboarding-panel">
-              <form data-onboarding-form data-initial-step="<?= $initialStep ?>" data-csrf-token="<?= escape_html($csrfToken) ?>">
+              <form data-onboarding-form data-initial-step="<?= $initialStep ?>" data-edit-only="<?= $editStep !== '' ? 'true' : 'false' ?>" data-return-section="<?= $editStep !== '' && ($_GET['return'] ?? '') === 'profile' ? 'profile' : 'overview' ?>" data-csrf-token="<?= escape_html($csrfToken) ?>">
                 <section class="onboarding-form-step" data-onboarding-step="address" hidden>
                   <h2>Address</h2>
                   <p>Where can we find you? Keep this up to date.</p>
@@ -329,7 +332,7 @@ header('X-Content-Type-Options: nosniff');
     </div>
   </div>
   <?php if ($section === 'onboarding'): ?>
-    <script src="assets/js/onboarding.js?v=20261012-1" defer></script>
+    <script src="assets/js/onboarding.js?v=20261012-2" defer></script>
   <?php endif; ?>
 </body>
 </html>
