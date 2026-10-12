@@ -1437,18 +1437,37 @@ a {
   border-bottom: 1px solid #e2e8f0;
 }
 
+.dashboard-header::after {
+  position: absolute;
+  right: clamp(20px, 5vw, 56px);
+  bottom: -1px;
+  left: clamp(20px, 5vw, 56px);
+  height: 2px;
+  background: linear-gradient(90deg, var(--hou-blue) 0%, var(--hou-cyan) 76%, var(--hou-orange) 100%);
+  content: "";
+}
+
 .dashboard-header .portal-brand {
   flex: 0 1 280px;
   min-width: 0;
+  color: var(--hou-navy);
   font-size: 16px;
+  transition: color .15s ease;
+}
+
+.dashboard-header .portal-brand:hover,
+.dashboard-header .portal-brand:focus-visible {
+  color: var(--hou-blue);
 }
 
 .dashboard-header .portal-brand img {
   width: 38px;
   height: 38px;
   flex: 0 0 38px;
-  padding: 2px;
-  border-radius: 0;
+  padding: 3px;
+  background: #fffaf5;
+  border: 1px solid #ffedd5;
+  border-radius: 9px;
 }
 
 .dashboard-account {
@@ -1475,7 +1494,8 @@ a {
 .dashboard-header .portal-logout:hover,
 .dashboard-header .portal-logout:focus-visible {
   color: #fff;
-  background: #1d4ed8;
+  background: var(--hou-blue);
+  border-color: var(--hou-blue);
 }
 
 .dashboard-layout {
@@ -1563,17 +1583,18 @@ a {
 .dashboard-nav-link:hover,
 .dashboard-nav-link:focus-visible,
 .dashboard-nav-link.is-active {
-  color: #1d4ed8;
+  color: var(--hou-blue);
   background: #eff6ff;
 }
 
 .dashboard-nav-link.is-active {
   font-weight: 600;
+  box-shadow: inset 3px 0 var(--hou-orange);
 }
 
 .dashboard-nav-link.is-active i,
 .dashboard-nav-link:hover i {
-  color: #1d4ed8;
+  color: var(--hou-blue);
 }
 
 .dashboard-sidebar-account {
@@ -1678,8 +1699,8 @@ a {
   gap: 8px;
   padding: 0 17px;
   color: #fff;
-  background: #1d4ed8;
-  border: 1px solid #1d4ed8;
+  background: linear-gradient(100deg, var(--hou-blue), #1d4ed8);
+  border: 1px solid var(--hou-blue);
   border-radius: 7px;
   font-size: 14px;
   font-weight: 600;
@@ -1691,7 +1712,7 @@ a {
 .onboarding-button:hover,
 .onboarding-button:focus-visible {
   color: #fff;
-  background: #1e40af;
+  background: linear-gradient(100deg, #1e40af, #0369a1);
 }
 
 .complete-profile-progress {
