@@ -73,6 +73,17 @@ function ensure_member_tables(PDO $pdo): void
     ");
 
     $pdo->exec("
+        CREATE TABLE IF NOT EXISTS admin_credentials (
+            id TINYINT UNSIGNED NOT NULL,
+            password_hash VARCHAR(255) NULL,
+            setup_token_hash CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NULL,
+            setup_token_expires_at TIMESTAMP NULL DEFAULT NULL,
+            PRIMARY KEY (id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+    $pdo->exec('INSERT IGNORE INTO admin_credentials (id) VALUES (1)');
+
+    $pdo->exec("
         CREATE TABLE IF NOT EXISTS member_announcements (
             id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
             title VARCHAR(180) NOT NULL,

@@ -30,6 +30,16 @@ CREATE TABLE IF NOT EXISTS auth_attempts (
   KEY idx_auth_attempts_time (attempted_at)
 ) ENGINE=InnoDB;
 
+CREATE TABLE IF NOT EXISTS admin_credentials (
+  id TINYINT UNSIGNED NOT NULL,
+  password_hash VARCHAR(255) NULL,
+  setup_token_hash CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NULL,
+  setup_token_expires_at TIMESTAMP NULL DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB;
+
+INSERT IGNORE INTO admin_credentials (id) VALUES (1);
+
 CREATE TABLE IF NOT EXISTS member_announcements (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   title VARCHAR(180) NOT NULL,

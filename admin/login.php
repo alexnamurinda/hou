@@ -83,6 +83,9 @@ $csrfToken = admin_csrf_token();
     <h1>Admin sign in</h1>
     <p class="subtitle">Sign in to view member records and submitted documents.</p>
     <?php if ($error !== ''): ?><div class="error" role="alert"><?= htmlspecialchars($error, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></div><?php endif; ?>
+    <?php if ($configuredPasswordHash === null): ?>
+      <p class="subtitle">Admin access is not set up yet. <a href="setup.php">Set the admin password</a> after generating a one-time setup code on the server.</p>
+    <?php endif; ?>
     <form method="post" action="login.php">
       <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>" />
       <label for="password">Admin password</label>

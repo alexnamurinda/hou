@@ -58,6 +58,8 @@ function require_admin(): void
 
 function admin_password_hash(): ?string
 {
-    $hash = getenv('HOU_ADMIN_PASSWORD_HASH');
+    $hash = db_connect()->query(
+        'SELECT password_hash FROM admin_credentials WHERE id = 1'
+    )->fetchColumn();
     return is_string($hash) && $hash !== '' ? $hash : null;
 }
