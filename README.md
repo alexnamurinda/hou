@@ -16,7 +16,7 @@ Choose either Namecheap Private Email or the email service included with your cP
 
 Namecheap Private Email may continue to be used for receiving mail, while Brevo handles OTP delivery. Authenticate `hotspotoperators.org` in Brevo, verify `info@hotspotoperators.org` as a sender, and configure the Brevo API key only in the PHP server environment. Allow DNS time to propagate and test delivery before enabling registration.
 
-For any other environment, configure `HOU_DB_HOST`, `HOU_DB_PORT`, `HOU_DB_NAME`, `HOU_DB_USER`, and `HOU_DB_PASSWORD` in the PHP server environment (for PHP-FPM, in its pool configuration, then restart PHP-FPM). Do not put database or SMTP passwords in this repository. Use a database account restricted to the `HOU` database, with permission to create tables on first portal load. Registration and login use the PHP session cookie and redirect authenticated members to the protected one-page portal at `client/member.php`.
+For any other environment, configure `HOU_DB_HOST`, `HOU_DB_PORT`, `HOU_DB_NAME`, `HOU_DB_USER`, and `HOU_DB_PASSWORD` in the PHP server environment (for PHP-FPM, in its pool configuration, then restart PHP-FPM). Do not put database or SMTP passwords in this repository. Use a database account restricted to the `HOU` database, with permission to create tables on first portal load. Registration and login use the PHP session cookie; newly registered members are signed in and taken directly to the member portal. The portal opens on a profile-completion overview, with the other member sections ready for future profile and service data.
 
 ## Member portal web app manifest
 

@@ -255,13 +255,7 @@
         password: signupPassword.value,
         password_confirmation: signupPasswordConfirm.value,
       }),
-      (result) => {
-        showPanel('login');
-        window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#login`);
-        document.getElementById('login-identifier').value = result.registration_number || document.getElementById('signup-phone').value;
-        showFeedback(result.message || 'Your account has been created. Please log in now.', result.email_sent === false ? 'error' : 'success');
-        document.getElementById('login-identifier').focus();
-      }
+      () => window.location.assign('member.php')
     );
   });
 

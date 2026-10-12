@@ -52,6 +52,7 @@ $insert = $pdo->prepare(
 );
 $pdo->beginTransaction();
 $registrationNumber = '';
+$memberId = 0;
 $inserted = false;
 $duplicateMessage = '';
 try {
@@ -66,6 +67,7 @@ try {
                 $email,
                 password_hash($password, PASSWORD_DEFAULT),
             ]);
+            $memberId = (int)$pdo->lastInsertId();
             $inserted = true;
             break;
         } catch (PDOException $error) {
@@ -110,12 +112,18 @@ try {
 }
 
 unset($_SESSION['signup_verified']);
+$_SESSION['member_id'] = $memberId;
+$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+$_SESSION['registration_notice'] = [
+    'email_sent' => $emailSent,
+];
+session_regenerate_id(true);
 respond_json(201, [
     'success' => true,
     'registration_number' => $registrationNumber,
     'email_sent' => $emailSent,
     'message' => $emailSent
-        ? 'Your account has been created. Your registration number has been emailed to you; keep it safe. Please log in now.'
+        ? 'Your account has been created. Your registration number has been emailed to you; keep it safe.'
         : 'Your account was created, but we could not email your registration number. Keep it safe: '
-            . $registrationNumber . '. You can log in now.',
+            . $registrationNumber . '.',
 ]);
