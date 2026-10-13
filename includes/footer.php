@@ -5,7 +5,7 @@
             <div class="col-md-3">
                 <div class="footer-info">
                     <div class="footer-logo mb-3">
-                        <h3>HOU <i class="fas fa-wifi"></i></h3>
+                        <h3>HOTNET<i class="fas fa-wifi"></i></h3>
                     </div>
                     <p>Advocating for fair policy, stronger networks, and better opportunities for hotspot operators across Uganda.</p>
                     <div class="social-links d-flex justify-content-center justify-content-md-start">
