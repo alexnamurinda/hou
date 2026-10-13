@@ -57,7 +57,7 @@ $overviewFields = [
     ],
     'Citizenship' => [
         'Card number' => 'national_id_number',
-        'National ID photo' => 'has_national_id_photo',
+        'National ID document' => 'has_national_id_photo',
     ],
 ];
 $completedSections = 0;
@@ -358,8 +358,8 @@ header('X-Content-Type-Options: nosniff');
                     <label>TIN <span>(optional)</span>
                       <input name="tin" type="text" maxlength="80" value="<?= escape_html((string)($profile['tin'] ?? '')) ?>" />
                     </label>
-                    <label class="onboarding-field-wide">Certificate of registration <span>(optional, PDF/JPG/PNG up to 5 MB)</span>
-                      <input name="business_certificate" type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" />
+                    <label class="onboarding-field-wide">Certificate of registration <span>(optional, PDF up to 5 MB)</span>
+                      <input name="business_certificate" type="file" accept=".pdf,application/pdf" />
                       <?php if (!empty($profile['has_business_certificate']) || !empty($profile['business_certificate_path'])): ?><small>A certificate is already saved. Upload a new file to replace it.</small><?php endif; ?>
                     </label>
                   </div>
@@ -391,9 +391,9 @@ header('X-Content-Type-Options: nosniff');
                     <label class="onboarding-field-wide">Card number
                       <input name="national_id_number" type="text" maxlength="80" placeholder="UG123456789" value="<?= escape_html((string)($profile['national_id_number'] ?? '')) ?>" required />
                     </label>
-                    <label class="onboarding-field-wide">National ID photo <span>(optional, JPG/PNG up to 5 MB)</span>
-                      <input name="national_id_photo" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" />
-                      <?php if (!empty($profile['has_national_id_photo']) || !empty($profile['national_id_photo_path'])): ?><small>A national ID photo is already saved. Upload a new file to replace it.</small><?php endif; ?>
+                    <label class="onboarding-field-wide">National ID document <span>(optional, scan the front and back together as one PDF; up to 5 MB)</span>
+                      <input name="national_id_photo" type="file" accept=".pdf,application/pdf" />
+                      <?php if (!empty($profile['has_national_id_photo']) || !empty($profile['national_id_photo_path'])): ?><small>A national ID document is already saved. Upload a new file to replace it.</small><?php endif; ?>
                     </label>
                   </div>
                 </section>

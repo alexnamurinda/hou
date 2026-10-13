@@ -20,7 +20,7 @@ function profile_text(string $field, int $maximumLength, bool $required = false)
     return $value;
 }
 
-function profile_upload(string $field, bool $imageOnly): ?array
+function profile_upload(string $field): ?array
 {
     if (!isset($_FILES[$field])) {
         return null;
@@ -47,15 +47,10 @@ function profile_upload(string $field, bool $imageOnly): ?array
     }
 
     $mimeType = (new finfo(FILEINFO_MIME_TYPE))->file($upload['tmp_name']);
-    $allowedTypes = $imageOnly
-        ? ['image/jpeg', 'image/png']
-        : ['application/pdf', 'image/jpeg', 'image/png'];
-    if (!is_string($mimeType) || !in_array($mimeType, $allowedTypes, true)) {
+    if ($mimeType !== 'application/pdf') {
         respond_json(422, [
             'success' => false,
-            'message' => $imageOnly
-                ? 'Upload a JPG or PNG image.'
-                : 'Upload a PDF, JPG, or PNG document.',
+            'message' => 'Upload a PDF document.',
         ]);
     }
 
@@ -93,7 +88,7 @@ switch ($step) {
             'business_registration_number' => profile_text('business_registration_number', 80),
             'tin' => profile_text('tin', 80),
         ];
-        $upload = profile_upload('business_certificate', false);
+        $upload = profile_upload('business_certificate');
         if ($upload !== null) {
             $values['business_certificate_data'] = $upload['data'];
             $values['business_certificate_mime'] = $upload['mime'];
@@ -116,7 +111,7 @@ switch ($step) {
         break;
     case 'citizenship':
         $values = ['national_id_number' => profile_text('national_id_number', 80, true)];
-        $upload = profile_upload('national_id_photo', true);
+        $upload = profile_upload('national_id_photo');
         if ($upload !== null) {
             $values['national_id_photo_data'] = $upload['data'];
             $values['national_id_photo_mime'] = $upload['mime'];

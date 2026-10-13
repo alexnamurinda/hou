@@ -347,7 +347,7 @@ $statusCounts = $statusCountsStatement->fetch() ?: ['total' => 0, 'active' => 0,
                     'type' => 'certificate',
                 ],
                 'national_id_photo' => [
-                    'title' => 'National ID photo',
+                    'title' => 'National ID document',
                     'has_data' => !empty($memberProfile['has_national_id_photo']),
                     'path' => $memberProfile['national_id_photo_path'] ?? null,
                     'mime' => $memberProfile['national_id_photo_mime'] ?? null,
