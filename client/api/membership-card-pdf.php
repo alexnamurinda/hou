@@ -534,7 +534,9 @@ function membership_card_pdf(array $member): string
     $joinedAt = trim((string)($member['created_at'] ?? ''));
     $membershipDate = $joinedAt !== '' ? (new DateTimeImmutable($joinedAt))->format('M Y') : 'NOT PROVIDED';
     $cardTexts = [
-        'HOTSPOT OPERATORS UNION',
+        'HOT',
+        'NET',
+        'HOTSPOT OPERATORS NETWORK UGANDA',
         'MEMBERSHIP',
         'CARD',
         'ID:',
@@ -582,15 +584,16 @@ function membership_card_pdf(array $member): string
     $content .= "0.91 0.94 0.97 rg 0 326 m 0 336 190 326 290 329 c "
         . "490 335 650 322 792 346 c 792 326 l h f\n";
     $content .= "q 145 0 0 145 29 343 cm /Logo Do Q\n";
-    $content .= "q 145 0 0 145 29 343 cm /Logo Do Q\n";
-    $brandSize = membership_card_pdf_fit_size($regularFont, 'HOTSPOT OPERATORS UNION', 420, 31);
+    $content .= membership_card_pdf_draw_text($boldFont, 'HOT', 'F2', 64, 181, 407, [0.02, 0.36, 0.75]);
+    $content .= membership_card_pdf_draw_text($boldFont, 'NET', 'F2', 64, 318, 407, [1, 0.53, 0.02]);
+    $brandSubtitleSize = membership_card_pdf_fit_size($boldFont, 'HOTSPOT OPERATORS NETWORK UGANDA', 430, 19);
     $content .= membership_card_pdf_draw_text(
-        $regularFont,
-        'HOTSPOT OPERATORS UNION',
-        'F1',
-        $brandSize,
+        $boldFont,
+        'HOTSPOT OPERATORS NETWORK UGANDA',
+        'F2',
+        $brandSubtitleSize,
         181,
-        408,
+        376,
         [0.05, 0.24, 0.49]
     );
     $content .= "q 120 0 0 120 637 359 cm /Avatar Do Q\n";

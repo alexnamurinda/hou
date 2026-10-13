@@ -84,6 +84,39 @@ a {
   text-decoration: none;
 }
 
+.hou-brand-lockup {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1;
+}
+
+.hou-brand-name,
+.auth-brand-name {
+  display: flex;
+  gap: 0;
+  color: #0754c5;
+  font-size: 23px;
+  font-weight: 800;
+  letter-spacing: .01em;
+  line-height: 1;
+}
+
+.hou-brand-name > :last-child,
+.auth-brand-name > :last-child {
+  color: #f58200;
+}
+
+.hou-brand-subtitle,
+.auth-brand-subtitle {
+  color: #123f78;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: .015em;
+  line-height: 1.2;
+}
+
 .member-brand img,
 .mobile-brand img {
   width: 44px;
@@ -830,14 +863,20 @@ a {
     object-fit: contain;
   }
 
-  .auth-hero h1 {
+  .auth-hero .auth-brand-name {
     position: relative;
     z-index: 1;
     margin: 0;
-    color: var(--hou-white);
-    font-size: clamp(19px, 5vw, 24px);
-    font-weight: 800;
-    line-height: 1.25;
+    font-size: clamp(25px, 7vw, 32px);
+  }
+
+  .auth-hero .auth-brand-subtitle {
+    position: relative;
+    z-index: 1;
+    margin-top: 5px;
+    color: #dbeafe;
+    font-size: clamp(8px, 2.2vw, 10px);
+    letter-spacing: .04em;
   }
 
   .auth-hero p {
@@ -1458,6 +1497,14 @@ a {
   background: #fffaf5;
   border: 1px solid #ffedd5;
   border-radius: 9px;
+}
+
+.dashboard-header .hou-brand-name {
+  font-size: 20px;
+}
+
+.dashboard-header .hou-brand-subtitle {
+  font-size: 6px;
 }
 
 .dashboard-account {

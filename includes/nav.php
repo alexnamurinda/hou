@@ -7,8 +7,11 @@ $activePage = $activePage ?? '';
 <nav class="navbar navbar-expand-lg navbar-light fixed-top">
     <div class="container">
         <a class="navbar-brand" href="<?= $basePath ?>index.php">
-            <img src="<?= $basePath ?>images/hou_logo.png" class="logo-img" alt="HOU_Logo">
-            <span class="brand-wordmark">Hotspot Operators Union</span>
+            <img src="<?= $basePath ?>images/hou_logo.png" class="logo-img" alt="">
+            <span class="brand-wordmark">
+                <span class="brand-wordmark-name">HOT<span class="brand-wordmark-net">NET</span></span>
+                <span class="brand-wordmark-subtitle">HOTSPOT OPERATORS NETWORK UGANDA</span>
+            </span>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>

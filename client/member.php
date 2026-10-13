@@ -119,14 +119,17 @@ header('X-Content-Type-Options: nosniff');
   <link rel="icon" type="image/png" href="../images/hou_logo.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/client.css?v=20261014-1" />
+  <link rel="stylesheet" href="assets/css/client.css?v=20261014-2" />
 </head>
 <body class="portal-dashboard-body">
   <div class="portal-shell">
     <header class="dashboard-header">
       <a class="portal-brand" href="member.php?section=overview">
         <img src="../images/hou_logo.png" alt="" />
-        <span>Hotspot Operators Union</span>
+        <span class="hou-brand-lockup">
+          <span class="hou-brand-name"><span>HOT</span><span>NET</span></span>
+          <span class="hou-brand-subtitle">HOTSPOT OPERATORS NETWORK UGANDA</span>
+        </span>
       </a>
       <div class="dashboard-account">
         <span class="dashboard-account-email"><?= escape_html($member['email']) ?></span>
