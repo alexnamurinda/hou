@@ -2007,6 +2007,40 @@ a {
   margin-top: 22px;
 }
 
+.membership-card-panel {
+  margin-top: 22px;
+}
+
+.membership-card-panel .profile-overview-heading {
+  margin-bottom: 0;
+}
+
+.membership-card-panel .profile-overview-heading p {
+  margin: 5px 0 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.membership-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.membership-card-download:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+.membership-card-help {
+  margin: 12px 0 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .profile-overview-heading {
   display: flex;
   align-items: center;

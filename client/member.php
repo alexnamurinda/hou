@@ -72,6 +72,7 @@ foreach ($profileSections as $fields) {
     $completedSections += $isComplete ? 1 : 0;
 }
 $progressPercent = (int)round(($completedSections / count($profileSections)) * 100);
+$membershipCardReady = $completedSections === count($profileSections);
 $onboardingSteps = [
     'address' => ['Address', 'fa-location-dot'],
     'business' => ['Business', 'fa-building'],
@@ -118,7 +119,7 @@ header('X-Content-Type-Options: nosniff');
   <link rel="icon" type="image/png" href="../images/hou_logo.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/client.css?v=20261012-7" />
+  <link rel="stylesheet" href="assets/css/client.css?v=20261014-1" />
 </head>
 <body class="portal-dashboard-body">
   <div class="portal-shell">
@@ -257,8 +258,27 @@ header('X-Content-Type-Options: nosniff');
         <?php elseif ($section === 'profile'): ?>
           <div class="dashboard-page-heading">
             <h1>Profile</h1>
-            <p>Manage yourmembership details. Choose a category to make changes.</p>
+            <p>Manage your membership details. Choose a category to make changes.</p>
           </div>
+          <section class="dashboard-panel membership-card-panel" aria-labelledby="membership-card-heading">
+            <div class="profile-overview-heading">
+              <div>
+                <h2 id="membership-card-heading">Membership card</h2>
+                <p>View your card at any time. Complete all required profile details to download it as a PDF.</p>
+              </div>
+            </div>
+            <div class="membership-card-actions">
+              <a class="onboarding-button" href="member-card.php" target="_blank" rel="noopener">View card</a>
+              <?php if ($membershipCardReady): ?>
+                <a class="onboarding-button" href="member-card.php?download=1">Download PDF</a>
+              <?php else: ?>
+                <button class="onboarding-button membership-card-download" type="button" disabled aria-describedby="membership-card-download-help">Download PDF</button>
+              <?php endif; ?>
+            </div>
+            <?php if (!$membershipCardReady): ?>
+              <p class="membership-card-help" id="membership-card-download-help">Complete the required Address, Business, Network, and Citizenship fields to enable the PDF download.</p>
+            <?php endif; ?>
+          </section>
           <div class="profile-overview-grid">
             <?php foreach ($overviewFields as $group => $fields): ?>
               <?php $editKey = strtolower($group); ?>
