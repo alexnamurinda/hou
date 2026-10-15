@@ -388,7 +388,7 @@ header('X-Content-Type-Options: nosniff');
                   <h2>Citizenship</h2>
                   <p>Your national ID details and identity verification.</p>
                   <div class="onboarding-fields">
-                    <label class="onboarding-field-wide">Card number
+                    <label class="onboarding-field-wide">NIN
                       <input name="national_id_number" type="text" maxlength="80" placeholder="UG123456789" value="<?= escape_html((string)($profile['national_id_number'] ?? '')) ?>" required />
                     </label>
                     <label class="onboarding-field-wide">National ID document <span>(optional, scan the front and back together as one PDF; up to 5 MB)</span>
