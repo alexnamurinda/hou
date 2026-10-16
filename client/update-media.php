@@ -17,7 +17,7 @@ if ($updateId === false || $updateId === null) {
 $query = db_connect()->prepare(
     "SELECT image_data, image_mime
      FROM member_announcements
-     WHERE id = ? AND status = 'published' AND published_at <= NOW()
+     WHERE id = ? AND status = 'published' AND (published_at IS NULL OR published_at <= NOW())
      LIMIT 1"
 );
 $query->execute([$updateId]);
