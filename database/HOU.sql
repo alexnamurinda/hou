@@ -44,6 +44,18 @@ CREATE TABLE IF NOT EXISTS member_announcements (
   KEY idx_member_announcements_visibility (status, published_at)
 ) ENGINE=InnoDB;
 
+CREATE TABLE IF NOT EXISTS member_announcement_reads (
+  member_id BIGINT UNSIGNED NOT NULL,
+  announcement_id BIGINT UNSIGNED NOT NULL,
+  opened_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (member_id, announcement_id),
+  KEY idx_member_announcement_reads_announcement (announcement_id),
+  CONSTRAINT fk_member_announcement_reads_member
+    FOREIGN KEY (member_id) REFERENCES members (id) ON DELETE CASCADE,
+  CONSTRAINT fk_member_announcement_reads_announcement
+    FOREIGN KEY (announcement_id) REFERENCES member_announcements (id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 CREATE TABLE IF NOT EXISTS member_profiles (
   member_id BIGINT UNSIGNED NOT NULL,
   district VARCHAR(120) NULL,

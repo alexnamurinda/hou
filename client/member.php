@@ -33,6 +33,12 @@ if ($section === 'updates') {
         );
         $updateQuery->execute([$updateId]);
         $selectedUpdate = $updateQuery->fetch() ?: null;
+        if ($selectedUpdate) {
+            $markUpdateOpened = db_connect()->prepare(
+                'INSERT IGNORE INTO member_announcement_reads (member_id, announcement_id) VALUES (?, ?)'
+            );
+            $markUpdateOpened->execute([$member['id'], $selectedUpdate['id']]);
+        }
     }
     $updatesQuery = db_connect()->query(
         "SELECT id, title, body, category, published_at, image_path
@@ -42,6 +48,19 @@ if ($section === 'updates') {
     );
     $updates = $updatesQuery->fetchAll();
 }
+$unreadUpdatesQuery = db_connect()->prepare(
+    "SELECT COUNT(*)
+     FROM member_announcements AS announcement
+     WHERE announcement.status = 'published'
+       AND (announcement.published_at IS NULL OR announcement.published_at <= NOW())
+       AND NOT EXISTS (
+           SELECT 1
+           FROM member_announcement_reads AS opened
+           WHERE opened.member_id = ? AND opened.announcement_id = announcement.id
+       )"
+);
+$unreadUpdatesQuery->execute([$member['id']]);
+$unreadUpdatesCount = (int)$unreadUpdatesQuery->fetchColumn();
 $profileQuery = db_connect()->prepare(
     'SELECT member_id, district, region, street_address, postal_address, business_name, trading_name, '
     . 'business_registration_number, tin, business_certificate_path, '
@@ -142,7 +161,7 @@ header('X-Content-Type-Options: nosniff');
   <link rel="icon" type="image/png" href="../images/hou_logo.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/client.css?v=20261017-2" />
+  <link rel="stylesheet" href="assets/css/client.css?v=20261017-3" />
 </head>
 <body class="portal-dashboard-body">
   <div class="portal-shell">
@@ -175,9 +194,13 @@ header('X-Content-Type-Options: nosniff');
           <?php foreach ($sections as $key => [$label, $icon]): ?>
             <a class="dashboard-nav-link<?= $section === $key ? ' is-active' : '' ?>"
                href="member.php?section=<?= escape_html($key) ?>"
-               <?= $section === $key ? 'aria-current="page"' : '' ?>>
+               <?= $section === $key ? 'aria-current="page"' : '' ?>
+               <?= $key === 'updates' && $unreadUpdatesCount > 0 ? 'aria-label="Updates, ' . $unreadUpdatesCount . ' unread"' : '' ?>>
               <i class="fa-solid <?= escape_html($icon) ?>" aria-hidden="true"></i>
               <span><?= escape_html($label) ?></span>
+              <?php if ($key === 'updates' && $unreadUpdatesCount > 0): ?>
+                <span class="dashboard-nav-badge" aria-hidden="true"><?= $unreadUpdatesCount > 99 ? '99+' : $unreadUpdatesCount ?></span>
+              <?php endif; ?>
             </a>
           <?php endforeach; ?>
         </nav>
