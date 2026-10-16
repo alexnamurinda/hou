@@ -58,6 +58,43 @@ function delete_update_image(mixed $filename): void
     }
 }
 
+function save_uploaded_update_image(string $temporaryPath, string $destinationPath, string &$failureReason): bool
+{
+    $warnings = [];
+    set_error_handler(static function (int $severity, string $message) use (&$warnings): bool {
+        $warnings[] = $message;
+        return true;
+    });
+
+    try {
+        if (move_uploaded_file($temporaryPath, $destinationPath)) {
+            return true;
+        }
+        if (copy($temporaryPath, $destinationPath)) {
+            if (!unlink($temporaryPath)) {
+                error_log('HOU could not remove temporary update upload: ' . $temporaryPath);
+            }
+            return true;
+        }
+    } finally {
+        restore_error_handler();
+    }
+
+    if (is_file($destinationPath) && !unlink($destinationPath)) {
+        error_log('HOU could not remove incomplete update image: ' . $destinationPath);
+    }
+    $failureReason = $warnings ? implode(' | ', $warnings) : 'PHP could not move or copy the uploaded file.';
+    error_log(
+        'HOU update image save failed. Destination: '
+        . $destinationPath
+        . '; directory writable: '
+        . (is_writable(dirname($destinationPath)) ? 'yes' : 'no')
+        . '; reason: '
+        . $failureReason
+    );
+    return false;
+}
+
 if ($editingId !== false && $editingId !== null) {
     $editQuery = $pdo->prepare(
         'SELECT id, title, body, category, status, image_path FROM member_announcements WHERE id = ? LIMIT 1'
@@ -170,8 +207,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                         $error = 'The update image folder could not be created. Check the website folder permissions.';
                     } else {
                         $destination = $updatesImageDirectory . '/' . $uploadedImage['filename'];
-                        if (!move_uploaded_file($uploadedImage['temporary_path'], $destination)) {
-                            $error = 'The update image could not be saved. Check the images folder permissions and try again.';
+                        $imageSaveFailure = '';
+                        if (!save_uploaded_update_image($uploadedImage['temporary_path'], $destination, $imageSaveFailure)) {
+                            $error = 'PHP could not save the image in ' . $updatesImageDirectory
+                                . '. Grant the Apache/PHP web-server account write permission to this folder, then try again.'
+                                . ' Details: ' . $imageSaveFailure;
                         } else {
                             $newImagePath = $uploadedImage['filename'];
                         }
