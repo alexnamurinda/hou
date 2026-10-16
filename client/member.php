@@ -26,18 +26,18 @@ if ($section === 'updates') {
     $updateId = filter_var($_GET['update'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
     if ($updateId !== false && $updateId !== null) {
         $updateQuery = db_connect()->prepare(
-            "SELECT id, title, body, category, published_at
+            "SELECT id, title, body, category, published_at, image_data IS NOT NULL AS has_image
              FROM member_announcements
-             WHERE id = ? AND status = 'published' AND published_at <= NOW() AND image_data IS NOT NULL
+             WHERE id = ? AND status = 'published' AND (published_at IS NULL OR published_at <= NOW())
              LIMIT 1"
         );
         $updateQuery->execute([$updateId]);
         $selectedUpdate = $updateQuery->fetch() ?: null;
     }
     $updatesQuery = db_connect()->query(
-        "SELECT id, title, body, category, published_at
+        "SELECT id, title, body, category, published_at, image_data IS NOT NULL AS has_image
          FROM member_announcements
-         WHERE status = 'published' AND published_at <= NOW() AND image_data IS NOT NULL
+         WHERE status = 'published' AND (published_at IS NULL OR published_at <= NOW())
          ORDER BY published_at DESC, id DESC"
     );
     $updates = $updatesQuery->fetchAll();
@@ -142,7 +142,7 @@ header('X-Content-Type-Options: nosniff');
   <link rel="icon" type="image/png" href="../images/hou_logo.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/client.css?v=20261014-2" />
+  <link rel="stylesheet" href="assets/css/client.css?v=20261016-1" />
 </head>
 <body class="portal-dashboard-body">
   <div class="portal-shell">
@@ -260,7 +260,11 @@ header('X-Content-Type-Options: nosniff');
           </div>
           <?php if ($selectedUpdate): ?>
             <article class="dashboard-panel update-detail">
-              <img class="update-detail-image" src="update-media.php?id=<?= (int)$selectedUpdate['id'] ?>" alt="" />
+              <?php if (!empty($selectedUpdate['has_image'])): ?>
+                <img class="update-detail-image" src="update-media.php?id=<?= (int)$selectedUpdate['id'] ?>" alt="" />
+              <?php else: ?>
+                <div class="update-detail-image-placeholder"><i class="fa-solid fa-bullhorn" aria-hidden="true"></i></div>
+              <?php endif; ?>
               <div class="update-detail-copy">
                 <a class="update-back-link" href="member.php?section=updates"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> All updates</a>
                 <p><?= nl2br(escape_html((string)$selectedUpdate['body'])) ?></p>
@@ -269,8 +273,12 @@ header('X-Content-Type-Options: nosniff');
           <?php elseif ($updates): ?>
             <div class="updates-grid">
               <?php foreach ($updates as $update): ?>
-                <article class="update-card">
-                  <img src="update-media.php?id=<?= (int)$update['id'] ?>" alt="" loading="lazy" />
+                <article class="update-card<?= empty($update['has_image']) ? ' update-card-no-image' : '' ?>">
+                  <?php if (!empty($update['has_image'])): ?>
+                    <img src="update-media.php?id=<?= (int)$update['id'] ?>" alt="" loading="lazy" />
+                  <?php else: ?>
+                    <div class="update-card-placeholder" aria-hidden="true"><i class="fa-solid fa-bullhorn"></i></div>
+                  <?php endif; ?>
                   <div class="update-card-overlay">
                     <span class="update-category"><?= escape_html(ucfirst((string)$update['category'])) ?></span>
                     <h2><?= escape_html((string)$update['title']) ?></h2>
