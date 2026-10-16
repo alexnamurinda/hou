@@ -77,8 +77,7 @@ function ensure_member_tables(PDO $pdo): void
             id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
             title VARCHAR(180) NOT NULL,
             body TEXT NOT NULL,
-            image_data MEDIUMBLOB NULL,
-            image_mime VARCHAR(32) NULL,
+            image_path VARCHAR(255) NULL,
             category ENUM('general', 'event', 'important', 'maintenance') NOT NULL DEFAULT 'general',
             status ENUM('draft', 'published') NOT NULL DEFAULT 'draft',
             published_at TIMESTAMP NULL DEFAULT NULL,
@@ -88,7 +87,7 @@ function ensure_member_tables(PDO $pdo): void
             KEY idx_member_announcements_visibility (status, published_at)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
-    ensure_member_announcement_media_columns($pdo);
+    ensure_member_announcement_image_path($pdo);
 
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS member_profiles (
@@ -121,22 +120,16 @@ function ensure_member_tables(PDO $pdo): void
     ensure_member_profile_upload_columns($pdo);
 }
 
-function ensure_member_announcement_media_columns(PDO $pdo): void
+function ensure_member_announcement_image_path(PDO $pdo): void
 {
     $columns = $pdo->query('SHOW COLUMNS FROM member_announcements')->fetchAll(PDO::FETCH_COLUMN);
-    $existingColumns = array_fill_keys($columns, true);
-    foreach ([
-        'image_data' => 'MEDIUMBLOB NULL',
-        'image_mime' => 'VARCHAR(32) NULL',
-    ] as $column => $definition) {
-        if (!isset($existingColumns[$column])) {
-            try {
-                $pdo->exec('ALTER TABLE member_announcements ADD COLUMN ' . $column . ' ' . $definition);
-            } catch (PDOException $error) {
-                $columns = $pdo->query('SHOW COLUMNS FROM member_announcements')->fetchAll(PDO::FETCH_COLUMN);
-                if (!in_array($column, $columns, true)) {
-                    throw $error;
-                }
+    if (!in_array('image_path', $columns, true)) {
+        try {
+            $pdo->exec('ALTER TABLE member_announcements ADD COLUMN image_path VARCHAR(255) NULL');
+        } catch (PDOException $error) {
+            $columns = $pdo->query('SHOW COLUMNS FROM member_announcements')->fetchAll(PDO::FETCH_COLUMN);
+            if (!in_array('image_path', $columns, true)) {
+                throw $error;
             }
         }
     }

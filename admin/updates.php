@@ -20,6 +20,7 @@ $categories = [
 $statuses = ['draft' => 'Draft', 'published' => 'Published'];
 $error = '';
 $success = (string)($_GET['saved'] ?? '') === '1';
+$updatesImageDirectory = __DIR__ . '/../images/updates';
 $formValues = [
     'title' => '',
     'body' => '',
@@ -29,9 +30,37 @@ $formValues = [
 $editingId = filter_var($_GET['id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
 $editing = null;
 
+function valid_update_image_filename(mixed $filename): ?string
+{
+    return is_string($filename) && preg_match('/\A[a-f0-9]{32}\.(?:jpg|png|webp)\z/', $filename) === 1
+        ? $filename
+        : null;
+}
+
+function existing_update_image_filename(mixed $filename): ?string
+{
+    $filename = valid_update_image_filename($filename);
+    return $filename !== null && is_file(__DIR__ . '/../images/updates/' . $filename)
+        ? $filename
+        : null;
+}
+
+function delete_update_image(mixed $filename): void
+{
+    $filename = valid_update_image_filename($filename);
+    if ($filename === null) {
+        return;
+    }
+
+    $imagePath = __DIR__ . '/../images/updates/' . $filename;
+    if (is_file($imagePath) && !unlink($imagePath)) {
+        error_log('HOU could not remove replaced or deleted update image: ' . $filename);
+    }
+}
+
 if ($editingId !== false && $editingId !== null) {
     $editQuery = $pdo->prepare(
-        'SELECT id, title, body, category, status, image_data IS NOT NULL AS has_image FROM member_announcements WHERE id = ? LIMIT 1'
+        'SELECT id, title, body, category, status, image_path FROM member_announcements WHERE id = ? LIMIT 1'
     );
     $editQuery->execute([$editingId]);
     $editing = $editQuery->fetch() ?: null;
@@ -57,8 +86,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 http_response_code(400);
                 $error = 'Select a valid update to delete.';
             } else {
+                $imageQuery = $pdo->prepare('SELECT image_path FROM member_announcements WHERE id = ? LIMIT 1');
+                $imageQuery->execute([$postId]);
+                $imageFilename = $imageQuery->fetchColumn();
                 $deleteQuery = $pdo->prepare('DELETE FROM member_announcements WHERE id = ?');
                 $deleteQuery->execute([$postId]);
+                if ($deleteQuery->rowCount() > 0) {
+                    delete_update_image($imageFilename);
+                }
                 header('Location: updates.php?saved=1', true, 303);
                 exit;
             }
@@ -67,7 +102,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             $editing = null;
             if ($editingId !== false && $editingId !== null) {
                 $editQuery = $pdo->prepare(
-                    'SELECT id, title, body, category, status, image_data IS NOT NULL AS has_image FROM member_announcements WHERE id = ? LIMIT 1'
+                    'SELECT id, title, body, category, status, image_path FROM member_announcements WHERE id = ? LIMIT 1'
                 );
                 $editQuery->execute([$editingId]);
                 $editing = $editQuery->fetch() ?: null;
@@ -93,8 +128,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 $error = 'Choose whether this update is a draft or published.';
             }
 
-            $imageData = null;
-            $imageMime = null;
+            $uploadedImage = null;
             $imageFile = $_FILES['image'] ?? null;
             if ($error === '' && is_array($imageFile) && ($imageFile['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
                 if (($imageFile['error'] ?? null) !== UPLOAD_ERR_OK || !is_string($imageFile['tmp_name'] ?? null) || !is_uploaded_file($imageFile['tmp_name'])) {
@@ -103,70 +137,79 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                     $imageSize = filesize($imageFile['tmp_name']);
                     $fileInfo = new finfo(FILEINFO_MIME_TYPE);
                     $detectedMime = $fileInfo->file($imageFile['tmp_name']);
+                    $imageInfo = getimagesize($imageFile['tmp_name']);
                     if ($imageSize === false || $imageSize < 1 || $imageSize > 5 * 1024 * 1024) {
                         $error = 'Choose an image no larger than 5 MB.';
-                    } elseif (!in_array($detectedMime, ['image/jpeg', 'image/png', 'image/webp'], true)) {
+                    } elseif (
+                        !in_array($detectedMime, ['image/jpeg', 'image/png', 'image/webp'], true)
+                        || !is_array($imageInfo)
+                        || ($imageInfo['mime'] ?? null) !== $detectedMime
+                    ) {
                         $error = 'Use a JPEG, PNG, or WebP image.';
                     } else {
-                        $contents = file_get_contents($imageFile['tmp_name']);
-                        if ($contents === false) {
-                            $error = 'The uploaded image could not be read.';
-                        } else {
-                            $imageData = $contents;
-                            $imageMime = $detectedMime;
-                        }
+                        $extension = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'][$detectedMime];
+                        $uploadedImage = [
+                            'temporary_path' => $imageFile['tmp_name'],
+                            'filename' => bin2hex(random_bytes(16)) . '.' . $extension,
+                        ];
                     }
                 }
             }
 
-            if ($error === '' && !$editing && $imageData === null) {
+            $currentImage = $editing ? existing_update_image_filename($editing['image_path'] ?? null) : null;
+            if ($error === '' && !$editing && $uploadedImage === null) {
                 $error = 'Choose an image for this update.';
-            } elseif ($error === '' && $editing && empty($editing['has_image']) && $imageData === null) {
+            } elseif ($error === '' && $editing && $currentImage === null && $uploadedImage === null) {
                 $error = 'Choose an image for this update.';
+            }
+
+            $newImagePath = null;
+            if ($error === '') {
+                if ($uploadedImage !== null) {
+                    if (!is_dir($updatesImageDirectory) && !mkdir($updatesImageDirectory, 0755, true) && !is_dir($updatesImageDirectory)) {
+                        $error = 'The update image folder could not be created. Check the website folder permissions.';
+                    } else {
+                        $destination = $updatesImageDirectory . '/' . $uploadedImage['filename'];
+                        if (!move_uploaded_file($uploadedImage['temporary_path'], $destination)) {
+                            $error = 'The update image could not be saved. Check the images folder permissions and try again.';
+                        } else {
+                            $newImagePath = $uploadedImage['filename'];
+                        }
+                    }
+                }
             }
 
             if ($error === '') {
-                if ($editing) {
-                    if ($imageData !== null) {
+                $imagePath = $newImagePath ?? $currentImage;
+                try {
+                    if ($editing) {
                         $saveQuery = $pdo->prepare(
                             "UPDATE member_announcements
-                             SET title = ?, body = ?, category = ?, status = ?,
-                                 published_at = CASE WHEN ? = 'published' THEN COALESCE(published_at, NOW()) ELSE NULL END,
-                                 image_data = ?, image_mime = ?
-                             WHERE id = ?"
-                        );
-                        foreach ([$title, $body, $category, $status, $status] as $index => $value) {
-                            $saveQuery->bindValue($index + 1, $value, PDO::PARAM_STR);
-                        }
-                        $saveQuery->bindValue(6, $imageData, PDO::PARAM_LOB);
-                        $saveQuery->bindValue(7, $imageMime, PDO::PARAM_STR);
-                        $saveQuery->bindValue(8, $editingId, PDO::PARAM_INT);
-                        $saveQuery->execute();
-                    } else {
-                        $saveQuery = $pdo->prepare(
-                            "UPDATE member_announcements
-                             SET title = ?, body = ?, category = ?, status = ?,
+                             SET title = ?, body = ?, category = ?, status = ?, image_path = ?,
                                  published_at = CASE WHEN ? = 'published' THEN COALESCE(published_at, NOW()) ELSE NULL END
                              WHERE id = ?"
                         );
-                        $saveQuery->execute([$title, $body, $category, $status, $status, $editingId]);
+                        $saveQuery->execute([$title, $body, $category, $status, $imagePath, $status, $editingId]);
+                    } else {
+                        $saveQuery = $pdo->prepare(
+                            "INSERT INTO member_announcements (title, body, image_path, category, status, published_at)
+                             VALUES (?, ?, ?, ?, ?, CASE WHEN ? = 'published' THEN NOW() ELSE NULL END)"
+                        );
+                        $saveQuery->execute([$title, $body, $imagePath, $category, $status, $status]);
                     }
-                } else {
-                    $saveQuery = $pdo->prepare(
-                        "INSERT INTO member_announcements (title, body, image_data, image_mime, category, status, published_at)
-                         VALUES (?, ?, ?, ?, ?, ?, CASE WHEN ? = 'published' THEN NOW() ELSE NULL END)"
-                    );
-                    $saveQuery->bindValue(1, $title, PDO::PARAM_STR);
-                    $saveQuery->bindValue(2, $body, PDO::PARAM_STR);
-                    $saveQuery->bindValue(3, $imageData, PDO::PARAM_LOB);
-                    $saveQuery->bindValue(4, $imageMime, PDO::PARAM_STR);
-                    $saveQuery->bindValue(5, $category, PDO::PARAM_STR);
-                    $saveQuery->bindValue(6, $status, PDO::PARAM_STR);
-                    $saveQuery->bindValue(7, $status, PDO::PARAM_STR);
-                    $saveQuery->execute();
+                } catch (PDOException $saveError) {
+                    delete_update_image($newImagePath);
+                    error_log('HOU update save failed: ' . $saveError->getMessage());
+                    $error = 'The update could not be saved. Please try again.';
                 }
-                header('Location: updates.php?saved=1', true, 303);
-                exit;
+
+                if ($error === '') {
+                    if ($newImagePath !== null && $currentImage !== null && $newImagePath !== $currentImage) {
+                        delete_update_image($currentImage);
+                    }
+                    header('Location: updates.php?saved=1', true, 303);
+                    exit;
+                }
             }
         } else {
             http_response_code(400);
@@ -176,7 +219,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 }
 
 $updatesQuery = $pdo->query(
-    'SELECT id, title, category, status, published_at, created_at, image_data IS NOT NULL AS has_image
+    'SELECT id, title, category, status, published_at, created_at, image_path
      FROM member_announcements ORDER BY created_at DESC, id DESC'
 );
 $updates = $updatesQuery->fetchAll();
@@ -240,7 +283,13 @@ function escape_update_admin(string $value): string
       <p class="subtitle">Write a member communication, choose its card image, then save it as a draft or publish it to the portal.</p>
       <?php if ($error !== ''): ?><div class="message error" role="alert"><?= escape_update_admin($error) ?></div><?php endif; ?>
       <?php if ($success): ?><div class="message" role="status">Update saved.</div><?php endif; ?>
-      <?php if ($editing && !empty($editing['has_image'])): ?><div class="message">An image is already attached. Upload another image to replace it.</div><?php endif; ?>
+      <?php if (
+          $editing
+          && ($currentImage = existing_update_image_filename($editing['image_path'] ?? null)) !== null
+      ): ?>
+        <div class="message">Current image. Upload a replacement if you want to change it.</div>
+        <img src="../images/updates/<?= rawurlencode($currentImage) ?>" alt="Current update image" style="display:block;width:min(100%,420px);max-height:220px;object-fit:cover;margin:0 0 16px;border-radius:9px" />
+      <?php endif; ?>
       <form method="post" action="updates.php" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="<?= escape_update_admin($csrfToken) ?>" />
         <input type="hidden" name="action" value="save" />
@@ -250,7 +299,7 @@ function escape_update_admin(string $value): string
         <label for="body">Content</label>
         <textarea id="body" name="body" maxlength="60000" required><?= escape_update_admin($formValues['body']) ?></textarea>
         <label for="image">Card image</label>
-        <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp" <?= $editing && !empty($editing['has_image']) ? '' : 'required' ?> />
+        <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp" <?= $editing && existing_update_image_filename($editing['image_path'] ?? null) !== null ? '' : 'required' ?> />
         <p class="help">JPEG, PNG, or WebP; maximum 5 MB. This image appears behind the title on the Updates page.</p>
         <label for="category">Category</label>
         <select id="category" name="category">
