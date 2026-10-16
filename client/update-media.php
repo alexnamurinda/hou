@@ -25,15 +25,34 @@ $media = $query->fetch();
 $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
 if (
     !$media
-    || !is_string($media['image_mime'] ?? null)
-    || !in_array($media['image_mime'], $allowedMimeTypes, true)
-    || $media['image_data'] === null
+    || !isset($media['image_data'])
 ) {
     http_response_code(404);
     exit;
 }
 
-header('Content-Type: ' . $media['image_mime']);
-header('Content-Length: ' . strlen((string)$media['image_data']));
+$imageData = $media['image_data'];
+if (is_resource($imageData)) {
+    $imageData = stream_get_contents($imageData);
+}
+if (!is_string($imageData) || $imageData === '') {
+    error_log('HOU update image is empty or unreadable for update ' . $updateId . '.');
+    http_response_code(404);
+    exit;
+}
+
+$imageMime = (new finfo(FILEINFO_MIME_TYPE))->buffer($imageData);
+if (
+    !is_string($imageMime)
+    || !in_array($imageMime, $allowedMimeTypes, true)
+    || !is_array(getimagesizefromstring($imageData))
+) {
+    error_log('HOU update image has invalid image data for update ' . $updateId . '.');
+    http_response_code(404);
+    exit;
+}
+
+header('Content-Type: ' . $imageMime);
+header('Content-Length: ' . strlen($imageData));
 header('Content-Disposition: inline');
-echo $media['image_data'];
+echo $imageData;

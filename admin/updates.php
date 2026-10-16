@@ -135,7 +135,13 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                                  image_data = ?, image_mime = ?
                              WHERE id = ?"
                         );
-                        $saveQuery->execute([$title, $body, $category, $status, $status, $imageData, $imageMime, $editingId]);
+                        foreach ([$title, $body, $category, $status, $status] as $index => $value) {
+                            $saveQuery->bindValue($index + 1, $value, PDO::PARAM_STR);
+                        }
+                        $saveQuery->bindValue(6, $imageData, PDO::PARAM_LOB);
+                        $saveQuery->bindValue(7, $imageMime, PDO::PARAM_STR);
+                        $saveQuery->bindValue(8, $editingId, PDO::PARAM_INT);
+                        $saveQuery->execute();
                     } else {
                         $saveQuery = $pdo->prepare(
                             "UPDATE member_announcements
@@ -150,7 +156,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                         "INSERT INTO member_announcements (title, body, image_data, image_mime, category, status, published_at)
                          VALUES (?, ?, ?, ?, ?, ?, CASE WHEN ? = 'published' THEN NOW() ELSE NULL END)"
                     );
-                    $saveQuery->execute([$title, $body, $imageData, $imageMime, $category, $status, $status]);
+                    $saveQuery->bindValue(1, $title, PDO::PARAM_STR);
+                    $saveQuery->bindValue(2, $body, PDO::PARAM_STR);
+                    $saveQuery->bindValue(3, $imageData, PDO::PARAM_LOB);
+                    $saveQuery->bindValue(4, $imageMime, PDO::PARAM_STR);
+                    $saveQuery->bindValue(5, $category, PDO::PARAM_STR);
+                    $saveQuery->bindValue(6, $status, PDO::PARAM_STR);
+                    $saveQuery->bindValue(7, $status, PDO::PARAM_STR);
+                    $saveQuery->execute();
                 }
                 header('Location: updates.php?saved=1', true, 303);
                 exit;
