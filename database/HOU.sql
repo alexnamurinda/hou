@@ -34,6 +34,8 @@ CREATE TABLE IF NOT EXISTS member_announcements (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   title VARCHAR(180) NOT NULL,
   body TEXT NOT NULL,
+  image_data MEDIUMBLOB NULL,
+  image_mime VARCHAR(32) NULL,
   category ENUM('general', 'event', 'important', 'maintenance') NOT NULL DEFAULT 'general',
   status ENUM('draft', 'published') NOT NULL DEFAULT 'draft',
   published_at TIMESTAMP NULL DEFAULT NULL,

@@ -254,6 +254,7 @@ $statusCounts = $statusCountsStatement->fetch() ?: ['total' => 0, 'active' => 0,
   <header class="topbar no-print">
     <a class="brand" href="../index.php"><img src="../images/hou_logo.png" alt="" /><span>HOU Admin</span></a>
     <div class="admin-header-actions">
+      <a class="back" href="updates.php">Member updates</a>
       <a class="back" href="../index.php">Back to website</a>
       <form method="post" action="logout.php">
         <input type="hidden" name="csrf_token" value="<?= escape_value($adminCsrfToken) ?>" />

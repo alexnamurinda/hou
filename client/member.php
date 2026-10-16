@@ -9,6 +9,7 @@ unset($_SESSION['registration_notice']);
 
 $sections = [
     'overview' => ['Overview', 'fa-house'],
+    'updates' => ['Updates', 'fa-bullhorn'],
     'onboarding' => ['Onboarding', 'fa-clipboard-list'],
     'network' => ['Network', 'fa-wifi'],
     'citizenship' => ['Citizenship', 'fa-briefcase'],
@@ -18,6 +19,28 @@ $sections = [
 $section = (string)($_GET['section'] ?? 'overview');
 if (!isset($sections[$section])) {
     $section = 'overview';
+}
+$selectedUpdate = null;
+$updates = [];
+if ($section === 'updates') {
+    $updateId = filter_var($_GET['update'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+    if ($updateId !== false && $updateId !== null) {
+        $updateQuery = db_connect()->prepare(
+            "SELECT id, title, body, category, published_at
+             FROM member_announcements
+             WHERE id = ? AND status = 'published' AND published_at <= NOW() AND image_data IS NOT NULL
+             LIMIT 1"
+        );
+        $updateQuery->execute([$updateId]);
+        $selectedUpdate = $updateQuery->fetch() ?: null;
+    }
+    $updatesQuery = db_connect()->query(
+        "SELECT id, title, body, category, published_at
+         FROM member_announcements
+         WHERE status = 'published' AND published_at <= NOW() AND image_data IS NOT NULL
+         ORDER BY published_at DESC, id DESC"
+    );
+    $updates = $updatesQuery->fetchAll();
 }
 $profileQuery = db_connect()->prepare(
     'SELECT member_id, district, region, street_address, postal_address, business_name, trading_name, '
@@ -230,6 +253,39 @@ header('X-Content-Type-Options: nosniff');
             <h2 id="recent-payments-heading">Recent payments</h2>
             <p>No payments yet.</p>
           </section>
+        <?php elseif ($section === 'updates'): ?>
+          <div class="dashboard-page-heading">
+            <h1><?= $selectedUpdate ? escape_html((string)$selectedUpdate['title']) : 'Updates' ?></h1>
+            <p><?= $selectedUpdate ? 'Posted ' . escape_html(date('F j, Y', strtotime((string)$selectedUpdate['published_at']))) : 'News, announcements, and opportunities from HOU.' ?></p>
+          </div>
+          <?php if ($selectedUpdate): ?>
+            <article class="dashboard-panel update-detail">
+              <img class="update-detail-image" src="update-media.php?id=<?= (int)$selectedUpdate['id'] ?>" alt="" />
+              <div class="update-detail-copy">
+                <a class="update-back-link" href="member.php?section=updates"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> All updates</a>
+                <p><?= nl2br(escape_html((string)$selectedUpdate['body'])) ?></p>
+              </div>
+            </article>
+          <?php elseif ($updates): ?>
+            <div class="updates-grid">
+              <?php foreach ($updates as $update): ?>
+                <article class="update-card">
+                  <img src="update-media.php?id=<?= (int)$update['id'] ?>" alt="" loading="lazy" />
+                  <div class="update-card-overlay">
+                    <span class="update-category"><?= escape_html(ucfirst((string)$update['category'])) ?></span>
+                    <h2><?= escape_html((string)$update['title']) ?></h2>
+                    <a class="update-read-more" href="member.php?section=updates&amp;update=<?= (int)$update['id'] ?>">Read more <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+                  </div>
+                </article>
+              <?php endforeach; ?>
+            </div>
+          <?php else: ?>
+            <section class="dashboard-panel section-placeholder updates-empty">
+              <span class="placeholder-icon"><i class="fa-solid fa-bullhorn" aria-hidden="true"></i></span>
+              <h2>No updates yet</h2>
+              <p>HOU announcements and communications will appear here when they are published.</p>
+            </section>
+          <?php endif; ?>
         <?php elseif ($section === 'network' || $section === 'citizenship'): ?>
           <?php $category = $overviewFields[$sections[$section][0]]; ?>
           <div class="dashboard-page-heading">
