@@ -92,7 +92,7 @@
         if (result.status === 'failed') {
           setWaitingForConfirmation(false);
           showFeedback('Payment was not completed. Your wallet has not been updated.', 'failed');
-          redirectToPaymentHistory(reference, 10000);
+          redirectToPaymentHistory(reference);
           return;
         }
         statusPollTimer = window.setTimeout(poll, attempts < 24 ? 5000 : 30000);
@@ -155,7 +155,7 @@
       } else if (status === 'failed') {
         setWaitingForConfirmation(false);
         showFeedback('Payment was not completed. Your wallet has not been updated.', 'failed');
-        redirectToPaymentHistory(result.reference, 10000);
+        redirectToPaymentHistory(result.reference);
       } else {
         const message = 'Check your phone and approve the mobile money prompt. Keep this page open while we confirm your payment.';
         setWaitingForConfirmation(true);
@@ -178,5 +178,7 @@
     setWaitingForConfirmation(true);
     showFeedback('Check your phone and approve the mobile money prompt. HOU is waiting for IOTEC to confirm your payment.', 'pending');
     pollForStatus(feedback.dataset.paymentReference);
+  } else if (feedback.dataset.paymentStatus === 'failed') {
+    showFeedback('This payment failed or expired. Your wallet has not been charged.', 'failed');
   }
 })();

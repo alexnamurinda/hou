@@ -100,9 +100,10 @@ function iotec_collection_amount_matches(
 
 function normalize_iotec_status(string $status): ?string
 {
-    return match (strtolower($status)) {
+    return match (strtolower(trim($status))) {
         'success' => 'successful',
-        'failed', 'cancelled', 'rejected', 'rolledback' => 'failed',
+        'failed', 'cancelled', 'canceled', 'rejected', 'rolledback',
+        'expired', 'timeout', 'timedout', 'invalidpin', 'insufficientfunds', 'declined' => 'failed',
         'pending', 'senttovendor', 'awaitingapproval', 'scheduled' => 'pending',
         default => null,
     };

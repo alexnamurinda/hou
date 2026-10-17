@@ -38,8 +38,6 @@ if (!is_string($providerReference)
     || preg_match('/\A[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\z/i', $providerReference) !== 1
     || !is_string($transactionReference)
     || preg_match('/\AHOU[A-F0-9]{16}\z/', $transactionReference) !== 1
-    || normalize_iotec_amount_minor_units($event['amount'] ?? null) === null
-    || ($event['currency'] ?? null) !== 'UGX'
     || $providerStatus === null) {
     respond_json(400, ['success' => false, 'message' => 'Invalid callback data.']);
 }
@@ -57,12 +55,14 @@ try {
         $pdo->rollBack();
         respond_json(404, ['success' => false, 'message' => 'Payment reference not found.']);
     }
-    if (!iotec_collection_amount_matches(
-        (int)$payment['amount_ugx'],
-        $event['amount'] ?? null,
-        $event['totalTransactionCharge'] ?? null,
-        $configuration['charges_category']
-    )) {
+    if ($providerStatus === 'successful'
+        && (($event['currency'] ?? null) !== 'UGX'
+            || !iotec_collection_amount_matches(
+                (int)$payment['amount_ugx'],
+                $event['amount'] ?? null,
+                $event['totalTransactionCharge'] ?? null,
+                $configuration['charges_category']
+            ))) {
         $pdo->rollBack();
         error_log('HOU IOTEC callback amount mismatch for ' . $transactionReference . '.');
         respond_json(422, ['success' => false, 'message' => 'Payment amount does not match.']);

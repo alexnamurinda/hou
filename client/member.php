@@ -504,8 +504,11 @@ header('X-Content-Type-Options: nosniff');
           </div>
           <?php if ($section === 'payments'): ?>
             <?php
-            $showPaymentNotice = $paymentNotice === 'pending';
+            $showPaymentNotice = in_array($paymentNotice, ['pending', 'failed'], true);
             $paymentNoticeMessage = 'Check your phone and approve the mobile money prompt. HOU is waiting for IOTEC to confirm your payment.';
+            if ($paymentNotice === 'failed') {
+                $paymentNoticeMessage = 'This payment failed or expired. Your wallet has not been charged.';
+            }
             ?>
             <section class="payment-wallet-card" aria-labelledby="payment-wallet-heading">
               <div>
@@ -547,11 +550,11 @@ header('X-Content-Type-Options: nosniff');
                 </div>
               </form>
               <div
-                class="payment-form-feedback"
+                class="payment-form-feedback<?= $paymentNotice === 'failed' ? ' is-error' : '' ?>"
                 data-payment-feedback
                 data-payment-reference="<?= escape_html($paymentReference) ?>"
                 data-payment-status="<?= $showPaymentNotice ? escape_html((string)$paymentNotice) : '' ?>"
-                role="status"
+                role="<?= $paymentNotice === 'failed' ? 'alert' : 'status' ?>"
                 tabindex="-1"
                 <?= $showPaymentNotice ? '' : 'hidden' ?>
               ><?= $showPaymentNotice ? escape_html($paymentNoticeMessage) : '' ?></div>
@@ -692,7 +695,7 @@ header('X-Content-Type-Options: nosniff');
   <?php if ($section === 'onboarding'): ?>
     <script src="assets/js/onboarding.js?v=20261012-2" defer></script>
   <?php elseif ($section === 'payments'): ?>
-    <script src="assets/js/payments.js?v=20261017-4" defer></script>
+    <script src="assets/js/payments.js?v=20261017-5" defer></script>
   <?php endif; ?>
 </body>
 </html>
