@@ -234,7 +234,7 @@ header('X-Content-Type-Options: nosniff');
   <link rel="icon" type="image/png" href="../images/hou_logo.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/client.css?v=20261017-6" />
+  <link rel="stylesheet" href="assets/css/client.css?v=20261017-7" />
 </head>
 <body class="portal-dashboard-body">
   <div class="portal-shell">
@@ -503,16 +503,20 @@ header('X-Content-Type-Options: nosniff');
             <p>Welcome, <?= escape_html(member_first_name((string)$member['full_name'])) ?>. Your HOU registration number is <strong><?= escape_html($member['registration_number']) ?></strong>.</p>
           </div>
           <?php if ($section === 'payments'): ?>
+            <?php
+            $showPaymentNotice = $paymentNotice === 'pending';
+            $paymentNoticeMessage = 'Check your phone and approve the mobile money prompt. HOU is waiting for IOTEC to confirm your payment.';
+            ?>
             <section class="payment-wallet-card" aria-labelledby="payment-wallet-heading">
               <div>
                 <span class="payment-wallet-label">Your confirmed contributions</span>
                 <h2 id="payment-wallet-heading">UGX <?= number_format($paymentTotal) ?></h2>
                 <p>Only successful payments count toward your HOU contribution total.</p>
               </div>
-              <button class="onboarding-button" type="button" data-payment-open aria-expanded="false" aria-controls="payment-form-panel">.</button>
+              <button class="onboarding-button" type="button" data-payment-open aria-expanded="<?= $showPaymentNotice ? 'true' : 'false' ?>" aria-controls="payment-form-panel">.</button>
             </section>
 
-            <div class="dashboard-panel payment-form-panel" id="payment-form-panel" data-payment-form-panel hidden>
+            <div class="dashboard-panel payment-form-panel" id="payment-form-panel" data-payment-form-panel <?= $showPaymentNotice ? '' : 'hidden' ?>>
               <h2>Make a payment</h2>
               <p>Select what you are paying for. Membership and supervision fees have fixed amounts. IOTEC transaction charges are also billed to the member.</p>
               <form data-payment-form data-csrf-token="<?= escape_html($csrfToken) ?>">
@@ -537,25 +541,21 @@ header('X-Content-Type-Options: nosniff');
                     <input name="payer_phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="20" value="<?= escape_html((string)$member['phone']) ?>" placeholder="+256 7XX XXX XXX" required />
                   </label>
                 </div>
-                <div class="payment-form-feedback" data-payment-feedback role="alert" tabindex="-1" hidden></div>
                 <div class="payment-form-actions">
                   <button class="onboarding-button" type="submit" data-payment-submit>Continue to payment</button>
                   <button class="payment-cancel-button" type="button" data-payment-cancel>Cancel</button>
                 </div>
               </form>
+              <div
+                class="payment-form-feedback"
+                data-payment-feedback
+                data-payment-reference="<?= escape_html($paymentReference) ?>"
+                data-payment-status="<?= $showPaymentNotice ? escape_html((string)$paymentNotice) : '' ?>"
+                role="status"
+                tabindex="-1"
+                <?= $showPaymentNotice ? '' : 'hidden' ?>
+              ><?= $showPaymentNotice ? escape_html($paymentNoticeMessage) : '' ?></div>
             </div>
-
-            <?php if ($paymentNotice !== null): ?>
-              <div class="payment-return-notice" data-payment-return data-payment-reference="<?= escape_html($paymentReference) ?>" data-payment-status="<?= escape_html((string)$paymentNotice) ?>" role="status">
-                <?php if ($paymentNotice === 'successful'): ?>
-                  Payment confirmed. Your contribution total has been updated.
-                <?php elseif ($paymentNotice === 'failed'): ?>
-                  This payment was not completed. You can try again.
-                <?php else: ?>
-                  Payment is being confirmed by IOTEC. This page will update when the result arrives.
-                <?php endif; ?>
-              </div>
-            <?php endif; ?>
 
             <section class="dashboard-panel payment-history-panel" aria-labelledby="payment-history-heading">
               <div class="payment-panel-heading">
@@ -692,7 +692,7 @@ header('X-Content-Type-Options: nosniff');
   <?php if ($section === 'onboarding'): ?>
     <script src="assets/js/onboarding.js?v=20261012-2" defer></script>
   <?php elseif ($section === 'payments'): ?>
-    <script src="assets/js/payments.js?v=20261017-2" defer></script>
+    <script src="assets/js/payments.js?v=20261017-4" defer></script>
   <?php endif; ?>
 </body>
 </html>

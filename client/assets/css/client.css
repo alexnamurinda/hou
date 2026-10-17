@@ -1951,8 +1951,7 @@ a {
   cursor: pointer;
 }
 
-.payment-form-feedback,
-.payment-return-notice {
+.payment-form-feedback {
   padding: 12px 14px;
   margin-top: 18px;
   color: #1e40af;
@@ -1963,15 +1962,13 @@ a {
   line-height: 1.5;
 }
 
-.payment-form-feedback.is-error,
-.payment-return-notice.is-error {
+.payment-form-feedback.is-error {
   color: #991b1b;
   background: #fef2f2;
   border-color: #fecaca;
 }
 
-.payment-form-feedback.is-successful,
-.payment-return-notice.is-successful {
+.payment-form-feedback.is-successful {
   color: #166534;
   background: #f0fdf4;
   border-color: #bbf7d0;
