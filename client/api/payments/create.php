@@ -175,7 +175,6 @@ try {
 }
 
 $providerReference = is_array($collectionResult) ? ($collectionResult['id'] ?? null) : null;
-$responseAmount = is_array($collectionResult) ? normalize_iotec_amount($collectionResult['amount'] ?? null) : null;
 $providerStatus = is_array($collectionResult) && is_string($collectionResult['status'] ?? null)
     ? normalize_iotec_status($collectionResult['status'])
     : null;
@@ -183,7 +182,12 @@ if (!is_array($collectionResult)
     || !is_string($providerReference)
     || preg_match('/\A[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\z/i', $providerReference) !== 1
     || ($collectionResult['externalId'] ?? null) !== $transactionReference
-    || $responseAmount !== (string)$amount
+    || !iotec_collection_amount_matches(
+        $amount,
+        $collectionResult['amount'] ?? null,
+        $collectionResult['totalTransactionCharge'] ?? null,
+        $configuration['charges_category']
+    )
     || ($collectionResult['currency'] ?? null) !== 'UGX'
     || $providerStatus === null) {
     error_log('HOU IOTEC collection endpoint returned an unexpected response for ' . $transactionReference . '.');

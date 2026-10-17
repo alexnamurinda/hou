@@ -46,20 +46,56 @@ function payment_gateway_configuration(): ?array
     ];
 }
 
-function normalize_iotec_amount(mixed $amount): ?string
+function normalize_iotec_amount_minor_units(mixed $amount): ?int
 {
-    if (is_int($amount)) {
-        $amount = (string)$amount;
-    } elseif (is_float($amount)) {
-        if (!is_finite($amount) || floor($amount) !== $amount) {
+    if (is_float($amount)) {
+        if (!is_finite($amount) || $amount < 0 || $amount > 2000000000) {
             return null;
         }
-        $amount = sprintf('%.0f', $amount);
+        $minorUnits = (int)round($amount * 100);
+        return abs($amount * 100 - $minorUnits) < 0.00001 ? $minorUnits : null;
     }
 
-    return is_string($amount) && preg_match('/\A\d{1,12}\z/', $amount) === 1
-        ? $amount
-        : null;
+    if (!is_int($amount) && !is_string($amount)) {
+        return null;
+    }
+
+    $amount = (string)$amount;
+    if (preg_match('/\A(0|[1-9]\d{0,9})(?:\.(\d{1,6}))?\z/', $amount, $matches) !== 1) {
+        return null;
+    }
+    $fraction = $matches[2] ?? '';
+    if (strlen($fraction) > 2 && trim(substr($fraction, 2), '0') !== '') {
+        return null;
+    }
+    $fraction = str_pad(substr($fraction, 0, 2), 2, '0');
+    return ((int)$matches[1] * 100) + (int)$fraction;
+}
+
+function iotec_collection_amount_matches(
+    int $contributionAmount,
+    mixed $providerAmount,
+    mixed $providerCharges,
+    string $chargesCategory
+): bool {
+    $amountMinorUnits = normalize_iotec_amount_minor_units($providerAmount);
+    if ($amountMinorUnits === null) {
+        return false;
+    }
+
+    $contributionMinorUnits = $contributionAmount * 100;
+    if ($amountMinorUnits === $contributionMinorUnits) {
+        return true;
+    }
+    if ($chargesCategory !== 'ChargeCustomer') {
+        return false;
+    }
+
+    $chargesMinorUnits = normalize_iotec_amount_minor_units($providerCharges);
+    return $chargesMinorUnits !== null
+        && $chargesMinorUnits > 0
+        && $amountMinorUnits >= $chargesMinorUnits
+        && $amountMinorUnits - $chargesMinorUnits === $contributionMinorUnits;
 }
 
 function normalize_iotec_status(string $status): ?string
