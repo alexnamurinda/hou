@@ -20,6 +20,79 @@ $section = (string)($_GET['section'] ?? 'overview');
 if (!isset($sections[$section])) {
     $section = 'overview';
 }
+$paymentTransactions = [];
+$paymentCount = 0;
+$paymentPage = max(1, (int)($_GET['page'] ?? 1));
+$paymentPageSize = 5;
+$paymentTotal = 0;
+$paymentReference = '';
+$paymentNotice = null;
+if ($section === 'overview' || $section === 'payments') {
+    $paymentWalletQuery = db_connect()->prepare(
+        "SELECT COALESCE(SUM(amount_ugx), 0)
+         FROM member_payments
+         WHERE member_id = ? AND status = 'successful'"
+    );
+    $paymentWalletQuery->execute([$member['id']]);
+    $paymentTotal = (int)$paymentWalletQuery->fetchColumn();
+
+    $paymentCountQuery = db_connect()->prepare('SELECT COUNT(*) FROM member_payments WHERE member_id = ?');
+    $paymentCountQuery->execute([$member['id']]);
+    $paymentCount = (int)$paymentCountQuery->fetchColumn();
+    $paymentPageCount = max(1, (int)ceil($paymentCount / $paymentPageSize));
+    $paymentPage = min($paymentPage, $paymentPageCount);
+    $paymentOffset = ($paymentPage - 1) * $paymentPageSize;
+    $paymentQuery = db_connect()->prepare(
+        'SELECT transaction_reference, payment_type, payment_method, amount_ugx, status, created_at '
+        . 'FROM member_payments WHERE member_id = ? ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?'
+    );
+    $paymentQuery->bindValue(1, $member['id'], PDO::PARAM_INT);
+    $paymentQuery->bindValue(2, $paymentPageSize, PDO::PARAM_INT);
+    $paymentQuery->bindValue(3, $paymentOffset, PDO::PARAM_INT);
+    $paymentQuery->execute();
+    $paymentTransactions = $paymentQuery->fetchAll();
+
+    $paymentReference = trim((string)($_GET['reference'] ?? ''));
+    if ($paymentReference !== '' && preg_match('/\AHOU[A-F0-9]{16}\z/', $paymentReference) === 1) {
+        $paymentNoticeQuery = db_connect()->prepare(
+            'SELECT status FROM member_payments WHERE transaction_reference = ? AND member_id = ? LIMIT 1'
+        );
+        $paymentNoticeQuery->execute([$paymentReference, $member['id']]);
+        $paymentNotice = $paymentNoticeQuery->fetchColumn() ?: null;
+    }
+}
+
+function render_payment_table(array $payments): void
+{
+    ?>
+    <div class="payment-table-wrap">
+      <table class="payment-table">
+        <thead>
+          <tr><th scope="col">Date</th><th scope="col">Reference</th><th scope="col">Payment</th><th scope="col">Amount</th><th scope="col">Status</th></tr>
+        </thead>
+        <tbody>
+          <?php foreach ($payments as $payment): ?>
+            <?php
+            $paymentTypeLabels = [
+                'voluntary' => 'Voluntary contribution',
+                'membership' => 'Membership fee',
+                'supervision' => 'Supervision fee',
+            ];
+            ?>
+            <tr>
+              <td><?= escape_html(date('M j, Y', strtotime((string)$payment['created_at']))) ?></td>
+              <td><?= escape_html((string)$payment['transaction_reference']) ?></td>
+              <td><?= escape_html($paymentTypeLabels[$payment['payment_type']] ?? 'Payment') ?></td>
+              <td>UGX <?= number_format((int)$payment['amount_ugx']) ?></td>
+              <td><span class="payment-status payment-status-<?= escape_html((string)$payment['status']) ?>"><?= escape_html(ucfirst((string)$payment['status'])) ?></span></td>
+            </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+    <?php
+}
+
 $selectedUpdate = null;
 $updates = [];
 if ($section === 'updates') {
@@ -161,7 +234,7 @@ header('X-Content-Type-Options: nosniff');
   <link rel="icon" type="image/png" href="../images/hou_logo.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/client.css?v=20261017-3" />
+  <link rel="stylesheet" href="assets/css/client.css?v=20261017-4" />
 </head>
 <body class="portal-dashboard-body">
   <div class="portal-shell">
@@ -273,8 +346,17 @@ header('X-Content-Type-Options: nosniff');
           </div>
 
           <section class="dashboard-panel recent-payments" aria-labelledby="recent-payments-heading">
-            <h2 id="recent-payments-heading">Recent payments</h2>
-            <p>No payments yet.</p>
+            <div class="payment-panel-heading">
+              <h2 id="recent-payments-heading">Recent payments</h2>
+              <strong class="payment-wallet-total">UGX <?= number_format($paymentTotal) ?> contributed</strong>
+            </div>
+            <?php if ($paymentTransactions): ?>
+              <?php render_payment_table($paymentTransactions); ?>
+              <a class="payment-history-link" href="member.php?section=payments">View payments and invoices <span aria-hidden="true">→</span></a>
+            <?php else: ?>
+              <p>No payments yet. Your confirmed contributions will appear here.</p>
+              <a class="payment-history-link" href="member.php?section=payments">Go to payments <span aria-hidden="true">→</span></a>
+            <?php endif; ?>
           </section>
         <?php elseif ($section === 'updates'): ?>
           <div class="dashboard-page-heading">
@@ -416,7 +498,88 @@ header('X-Content-Type-Options: nosniff');
             <h1><?= escape_html($sections[$section][0]) ?></h1>
             <p>Welcome, <?= escape_html(member_first_name((string)$member['full_name'])) ?>. Your HOU registration number is <strong><?= escape_html($member['registration_number']) ?></strong>.</p>
           </div>
-          <?php if ($section === 'onboarding'): ?>
+          <?php if ($section === 'payments'): ?>
+            <section class="payment-wallet-card" aria-labelledby="payment-wallet-heading">
+              <div>
+                <span class="payment-wallet-label">Your confirmed contributions</span>
+                <h2 id="payment-wallet-heading">UGX <?= number_format($paymentTotal) ?></h2>
+                <p>Only successful payments count toward your HOU contribution total.</p>
+              </div>
+              <button class="onboarding-button" type="button" data-payment-open aria-expanded="false" aria-controls="payment-form-panel">Pay now</button>
+            </section>
+
+            <div class="dashboard-panel payment-form-panel" id="payment-form-panel" data-payment-form-panel hidden>
+              <h2>Make a payment</h2>
+              <p>Select what you are paying for. Membership and supervision fees have fixed amounts. IOTEC transaction charges are also billed to the member.</p>
+              <form data-payment-form data-csrf-token="<?= escape_html($csrfToken) ?>">
+                <div class="payment-form-fields">
+                  <label>Payment type
+                    <select name="payment_type" data-payment-type required>
+                      <option value="voluntary">Voluntary contribution</option>
+                      <option value="membership">Membership fee</option>
+                      <option value="supervision">Supervision fee</option>
+                    </select>
+                  </label>
+                  <label>Payment method
+                    <select name="payment_method" required>
+                      <option value="mobile_money">Mobile Money (processed by IOTEC Wallet)</option>
+                    </select>
+                  </label>
+                  <label>Amount (UGX)
+                    <input name="amount" type="number" min="500" max="1000000000" step="1" inputmode="numeric" data-payment-amount required />
+                    <small data-payment-amount-help>Enter the amount you would like to contribute.</small>
+                  </label>
+                  <label>Mobile money phone number
+                    <input name="payer_phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="20" value="<?= escape_html((string)$member['phone']) ?>" placeholder="+256 7XX XXX XXX" required />
+                  </label>
+                </div>
+                <div class="payment-form-feedback" data-payment-feedback role="alert" tabindex="-1" hidden></div>
+                <div class="payment-form-actions">
+                  <button class="onboarding-button" type="submit" data-payment-submit>Continue to payment</button>
+                  <button class="payment-cancel-button" type="button" data-payment-cancel>Cancel</button>
+                </div>
+              </form>
+            </div>
+
+            <?php if ($paymentNotice !== null): ?>
+              <div class="payment-return-notice" data-payment-return data-payment-reference="<?= escape_html($paymentReference) ?>" data-payment-status="<?= escape_html((string)$paymentNotice) ?>" role="status">
+                <?php if ($paymentNotice === 'successful'): ?>
+                  Payment confirmed. Your contribution total has been updated.
+                <?php elseif ($paymentNotice === 'failed'): ?>
+                  This payment was not completed. You can try again.
+                <?php else: ?>
+                  Payment is being confirmed by IOTEC. This page will update when the result arrives.
+                <?php endif; ?>
+              </div>
+            <?php endif; ?>
+
+            <section class="dashboard-panel payment-history-panel" aria-labelledby="payment-history-heading">
+              <div class="payment-panel-heading">
+                <h2 id="payment-history-heading">Payment history</h2>
+                <span><?= $paymentCount ?> transaction<?= $paymentCount === 1 ? '' : 's' ?></span>
+              </div>
+              <?php if ($paymentTransactions): ?>
+                <?php render_payment_table($paymentTransactions); ?>
+                <?php if ($paymentPageCount > 1): ?>
+                  <nav class="payment-pagination" aria-label="Payment history pages">
+                    <?php if ($paymentPage > 1): ?>
+                      <a href="member.php?section=payments&amp;page=<?= $paymentPage - 1 ?>">← Previous</a>
+                    <?php else: ?>
+                      <span class="is-disabled" aria-disabled="true">← Previous</span>
+                    <?php endif; ?>
+                    <span>Page <?= $paymentPage ?> of <?= $paymentPageCount ?></span>
+                    <?php if ($paymentPage < $paymentPageCount): ?>
+                      <a href="member.php?section=payments&amp;page=<?= $paymentPage + 1 ?>">Next →</a>
+                    <?php else: ?>
+                      <span class="is-disabled" aria-disabled="true">Next →</span>
+                    <?php endif; ?>
+                  </nav>
+                <?php endif; ?>
+              <?php else: ?>
+                <p class="payment-empty-state">No transactions yet. Choose Pay now to make your first contribution.</p>
+              <?php endif; ?>
+            </section>
+          <?php elseif ($section === 'onboarding'): ?>
             <div class="onboarding-stepper" aria-label="Profile setup progress">
               <?php foreach ($onboardingSteps as $stepKey => [$stepLabel, $stepIcon]): ?>
                 <div class="onboarding-stepper-item" data-stepper-item="<?= escape_html($stepKey) ?>">
@@ -524,6 +687,8 @@ header('X-Content-Type-Options: nosniff');
   </div>
   <?php if ($section === 'onboarding'): ?>
     <script src="assets/js/onboarding.js?v=20261012-2" defer></script>
+  <?php elseif ($section === 'payments'): ?>
+    <script src="assets/js/payments.js?v=20261017-1" defer></script>
   <?php endif; ?>
 </body>
 </html>

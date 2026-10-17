@@ -1830,6 +1830,220 @@ a {
   font-size: 14px;
 }
 
+.payment-panel-heading,
+.payment-form-actions,
+.payment-pagination,
+.payment-wallet-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.payment-panel-heading > span,
+.payment-wallet-label,
+.payment-wallet-card p,
+.payment-form-panel > p,
+.payment-form-fields small,
+.payment-empty-state {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.payment-wallet-total {
+  color: #1d4ed8;
+  font-size: 13px;
+}
+
+.payment-history-link {
+  display: inline-flex;
+  gap: 7px;
+  margin-top: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.payment-wallet-card {
+  padding: 25px 27px;
+  background: linear-gradient(120deg, #eff6ff, #f8fafc);
+  border: 1px solid #bfdbfe;
+  border-radius: 9px;
+}
+
+.payment-wallet-label {
+  font-weight: 600;
+}
+
+.payment-wallet-card h2 {
+  margin: 7px 0;
+  color: #0f172a;
+  font-size: clamp(24px, 3vw, 34px);
+}
+
+.payment-wallet-card p {
+  margin: 0;
+}
+
+.payment-form-panel[hidden] {
+  display: none;
+}
+
+.payment-form-panel > p {
+  margin: 7px 0 22px;
+}
+
+.payment-form-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.payment-form-fields label {
+  display: grid;
+  gap: 8px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.payment-form-fields input,
+.payment-form-fields select {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  color: #0f172a;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.payment-form-fields input:focus,
+.payment-form-fields select:focus {
+  outline: 3px solid rgba(37, 99, 235, .18);
+  border-color: #2563eb;
+}
+
+.payment-form-fields input[readonly] {
+  color: #475569;
+  background: #f1f5f9;
+}
+
+.payment-form-fields small {
+  font-weight: 400;
+}
+
+.payment-form-actions {
+  justify-content: flex-start;
+  margin-top: 22px;
+}
+
+.payment-cancel-button {
+  min-height: 43px;
+  padding: 0 14px;
+  color: #334155;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.payment-form-feedback,
+.payment-return-notice {
+  padding: 12px 14px;
+  margin-top: 18px;
+  color: #1e40af;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 7px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.payment-form-feedback.is-error {
+  color: #991b1b;
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.payment-history-panel {
+  overflow: hidden;
+}
+
+.payment-table-wrap {
+  width: 100%;
+  margin-top: 16px;
+  overflow-x: auto;
+}
+
+.payment-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.payment-table th,
+.payment-table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.payment-table th {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.payment-status {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.payment-status-pending {
+  color: #854d0e;
+  background: #fef3c7;
+}
+
+.payment-status-successful {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.payment-status-failed {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+.payment-pagination {
+  justify-content: center;
+  margin-top: 20px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.payment-pagination a {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.payment-pagination .is-disabled {
+  color: #94a3b8;
+}
+
+.payment-empty-state {
+  margin: 16px 0 0;
+}
+
 .section-placeholder {
   min-height: 260px;
   display: flex;
@@ -2508,6 +2722,26 @@ a {
 
   .recent-payments h2 {
     font-size: 17px;
+  }
+
+  .payment-wallet-card {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 20px 18px;
+  }
+
+  .payment-form-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-panel-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .payment-pagination {
+    gap: 9px;
+    font-size: 12px;
   }
 
   .section-placeholder {

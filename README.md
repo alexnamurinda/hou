@@ -22,6 +22,28 @@ For any other environment, configure `HOU_DB_HOST`, `HOU_DB_PORT`, `HOU_DB_NAME`
 
 The member Profile page includes a membership-card preview and PDF download. Members can preview their card at any time; the download is enabled only after all required Address, Business, Network, and Citizenship profile fields are complete. Cards use the supplied HOU logo and profile placeholder, are generated at standard CR80 card dimensions, and embed locally bundled Poppins fonts (licensed under `client/assets/fonts/OFL.txt`); no additional Composer packages are required.
 
+### Member payments and IOTEC setup
+
+The member Payments & Invoices page shows the member's confirmed contribution total and payment history (five transactions per page). Payment types are voluntary contributions, the fixed UGX 600,000 membership fee, and the fixed UGX 100,000 supervision fee. Fixed fees are revalidated by the server; voluntary contributions must be between UGX 500 and UGX 1,000,000,000, matching IOTEC's documented collection limits. Transactions remain pending until IOTEC reports `Success`; browser redirects never mark a payment as successful. The `member_payments` table is created automatically on the next portal request, or can be created from `database/HOU.sql`.
+
+The integration follows the [IOTEC Pay API specification](https://iotec.io/api-docs/pay). It uses OAuth 2.0 client credentials to request a short-lived token from `https://id.iotec.io/connect/token`, then starts a mobile-money collection at `https://pay.iotec.io/api/collections/collect`. The request uses IOTEC's `MobileMoney` category, UGX currency, wallet UUID, the member's MSISDN, a unique HOU `externalId`, payer/payee notes, and the configured transaction charge category. Ugandan phone numbers are sent in local 10-digit format (for example `0771234567`).
+
+Set these PHP server environment variables:
+
+* `HOU_PUBLIC_BASE_URL` — public HTTPS portal base URL including `/client`, for example `https://hotspotoperators.org/client`.
+* `HOU_IOTEC_CLIENT_ID` and `HOU_IOTEC_CLIENT_SECRET` — client credentials emailed by IOTEC when the Pay account is registered. The application exchanges these for a short-lived bearer token for each payment request.
+* `HOU_IOTEC_WALLET_ID` — UUID of the collection wallet in the IOTEC Pay portal.
+* `HOU_IOTEC_TRANSACTION_CHARGES_CATEGORY` — optional override: `ChargeWallet` deducts fees from HOU's IOTEC wallet; `ChargeCustomer` charges the member. The current HOU choice is `ChargeCustomer`, which is the default when this variable is unset.
+* `HOU_IOTEC_WEBHOOK_SECRET` — random secret of at least 32 characters for the callback security header.
+
+In the IOTEC Pay portal, open the collection wallet's callback settings and add `HOU_PUBLIC_BASE_URL/api/payments/callback.php` as a **Collection** callback. Add this security header (the value must match the server's `HOU_IOTEC_WEBHOOK_SECRET`):
+
+```text
+X-HOU-Webhook-Secret: <same value as HOU_IOTEC_WEBHOOK_SECRET>
+```
+
+IOTEC's callback contains its transaction `id`, HOU `externalId`, amount, currency, and status. HOU checks the callback secret, provider transaction ID, UGX amount, and external reference before updating status. `SentToVendor` remains pending; only `Success` increases the member's contribution total. Store credentials only in the PHP server environment or a protected secret store, never in this repository. For Apache/XAMPP, set environment variables for the Apache service and restart it; for PHP-FPM, set them in the pool configuration and restart PHP-FPM. PHP cURL must be enabled, and the database user must be able to create tables.
+
 ## Member portal web app manifest
 
 [`client/manifest.json`](client/manifest.json) provides browser installation and launch details for the HOU member portal. It defines the app name, description, start page, launch scope, standalone display mode, portrait orientation, theme and background colors, language, category, HOU logo icon, and shortcuts for Log In and Sign Up. Browsers use these settings when a user installs or launches the portal as a web app. The manifest is not required for ordinary website visits, registration, or login.

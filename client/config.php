@@ -132,6 +132,30 @@ function ensure_member_tables(PDO $pdo): void
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
     ensure_member_profile_upload_columns($pdo);
+
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS member_payments (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            member_id BIGINT UNSIGNED NOT NULL,
+            transaction_reference CHAR(19) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+            provider_reference VARCHAR(120) NULL,
+            payment_type ENUM('voluntary', 'membership', 'supervision') NOT NULL,
+            payment_method ENUM('mobile_money') NOT NULL,
+            amount_ugx DECIMAL(12, 0) UNSIGNED NOT NULL,
+            payer_phone VARCHAR(20) NOT NULL,
+            status ENUM('pending', 'successful', 'failed') NOT NULL DEFAULT 'pending',
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            paid_at TIMESTAMP NULL DEFAULT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY uq_member_payments_transaction_reference (transaction_reference),
+            UNIQUE KEY uq_member_payments_provider_reference (provider_reference),
+            KEY idx_member_payments_member_created (member_id, created_at, id),
+            KEY idx_member_payments_member_status (member_id, status),
+            CONSTRAINT fk_member_payments_member
+                FOREIGN KEY (member_id) REFERENCES members (id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
 }
 
 function ensure_member_announcement_image_path(PDO $pdo): void
