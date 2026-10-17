@@ -166,36 +166,32 @@ if ($collectionResponse === false || $collectionHttpStatus < 200 || $collectionH
 try {
     $collectionResult = json_decode($collectionResponse, true, 512, JSON_THROW_ON_ERROR);
 } catch (JsonException) {
-    error_log('HOU IOTEC collection endpoint returned invalid JSON for ' . $transactionReference . '.');
-    respond_json(502, [
-        'success' => false,
-        'message' => 'The payment provider returned an unreadable response. Check your payment history before retrying.',
-        'reference' => $transactionReference,
-    ]);
+    $collectionResult = null;
 }
 
-$providerReference = is_array($collectionResult) ? ($collectionResult['id'] ?? null) : null;
-$providerStatus = is_array($collectionResult) && is_string($collectionResult['status'] ?? null)
-    ? normalize_iotec_status($collectionResult['status'])
-    : null;
-if (!is_array($collectionResult)
-    || !is_string($providerReference)
-    || preg_match('/\A[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\z/i', $providerReference) !== 1
-    || ($collectionResult['externalId'] ?? null) !== $transactionReference
-    || !iotec_collection_amount_matches(
+$providerReferenceCandidate = is_array($collectionResult) ? ($collectionResult['id'] ?? null) : null;
+$providerReferenceValid = is_string($providerReferenceCandidate)
+    && preg_match('/\A[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\z/i', $providerReferenceCandidate) === 1;
+$externalIdMatches = is_array($collectionResult)
+    && ($collectionResult['externalId'] ?? null) === $transactionReference;
+$amountMatches = is_array($collectionResult)
+    && iotec_collection_amount_matches(
         $amount,
         $collectionResult['amount'] ?? null,
         $collectionResult['totalTransactionCharge'] ?? null,
         $configuration['charges_category']
-    )
-    || ($collectionResult['currency'] ?? null) !== 'UGX'
-    || $providerStatus === null) {
-    error_log('HOU IOTEC collection endpoint returned an unexpected response for ' . $transactionReference . '.');
-    respond_json(502, [
-        'success' => false,
-        'message' => 'The payment provider returned an invalid response. Check your payment history before retrying.',
-        'reference' => $transactionReference,
-    ]);
+    );
+$currencyMatches = is_array($collectionResult) && ($collectionResult['currency'] ?? null) === 'UGX';
+$providerStatus = is_array($collectionResult) && is_string($collectionResult['status'] ?? null)
+    ? normalize_iotec_status($collectionResult['status'])
+    : null;
+$responseVerified = $providerReferenceValid
+    && $externalIdMatches
+    && $amountMatches
+    && $currencyMatches
+    && $providerStatus !== null;
+if (!$responseVerified) {
+    error_log('HOU IOTEC collection response requires callback confirmation for ' . $transactionReference . '.');
 }
 
 $pdo->beginTransaction();
@@ -208,9 +204,10 @@ try {
     if ($currentStatus === false) {
         throw new RuntimeException('HOU payment transaction disappeared before its IOTEC response was saved.');
     }
-    $finalStatus = $currentStatus === 'pending' ? $providerStatus : $currentStatus;
+    $finalStatus = $currentStatus === 'pending' && $responseVerified ? $providerStatus : $currentStatus;
+    $providerReference = $responseVerified ? $providerReferenceCandidate : null;
     $update = $pdo->prepare(
-        'UPDATE member_payments SET provider_reference = ?, status = ?, '
+        'UPDATE member_payments SET provider_reference = COALESCE(?, provider_reference), status = ?, '
         . "paid_at = CASE WHEN ? = 'successful' THEN COALESCE(paid_at, NOW()) ELSE paid_at END "
         . 'WHERE transaction_reference = ?'
     );
@@ -226,7 +223,7 @@ try {
 $message = match ($finalStatus) {
     'successful' => 'Payment confirmed.',
     'failed' => 'The payment was not completed.',
-    default => 'Approve the mobile money prompt on your phone. Your contribution will update when IOTEC confirms it.',
+    default => 'Your payment request was sent. Approve the mobile money prompt if it appeared; HOU will update your contribution when IOTEC confirms the payment. Check your payment history before retrying.',
 };
 respond_json(200, [
     'success' => true,

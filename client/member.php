@@ -509,7 +509,7 @@ header('X-Content-Type-Options: nosniff');
                 <h2 id="payment-wallet-heading">UGX <?= number_format($paymentTotal) ?></h2>
                 <p>Only successful payments count toward your HOU contribution total.</p>
               </div>
-              <button class="onboarding-button" type="button" data-payment-open aria-expanded="false" aria-controls="payment-form-panel">Pay now</button>
+              <button class="onboarding-button" type="button" data-payment-open aria-expanded="false" aria-controls="payment-form-panel">.</button>
             </section>
 
             <div class="dashboard-panel payment-form-panel" id="payment-form-panel" data-payment-form-panel hidden>
