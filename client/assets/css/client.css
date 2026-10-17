@@ -1963,10 +1963,43 @@ a {
   line-height: 1.5;
 }
 
-.payment-form-feedback.is-error {
+.payment-form-feedback.is-error,
+.payment-return-notice.is-error {
   color: #991b1b;
   background: #fef2f2;
   border-color: #fecaca;
+}
+
+.payment-form-feedback.is-successful,
+.payment-return-notice.is-successful {
+  color: #166534;
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.payment-status-indicator {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  vertical-align: -2px;
+}
+
+.payment-status-indicator-loading,
+.payment-status-indicator-pending {
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: payment-status-spin .8s linear infinite;
+}
+
+.payment-status-indicator-successful::before {
+  content: "\2713";
+  font-size: 17px;
+  font-weight: 800;
+}
+
+@keyframes payment-status-spin {
+  to { transform: rotate(360deg); }
 }
 
 .payment-history-panel {
