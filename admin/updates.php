@@ -58,6 +58,46 @@ function delete_update_image(mixed $filename): void
     }
 }
 
+function uploaded_update_attachment(array $upload, string &$failureReason): ?array
+{
+    if (($upload['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+        return null;
+    }
+    if (
+        ($upload['error'] ?? null) !== UPLOAD_ERR_OK
+        || !is_string($upload['tmp_name'] ?? null)
+        || !is_uploaded_file($upload['tmp_name'])
+    ) {
+        $failureReason = 'The PDF upload failed. Please choose the file again.';
+        return null;
+    }
+
+    $size = filesize($upload['tmp_name']);
+    if ($size === false || $size < 1 || $size > 5 * 1024 * 1024) {
+        $failureReason = 'Choose a PDF no larger than 5 MB.';
+        return null;
+    }
+    if ((new finfo(FILEINFO_MIME_TYPE))->file($upload['tmp_name']) !== 'application/pdf') {
+        $failureReason = 'The attachment must be a PDF file.';
+        return null;
+    }
+
+    $data = file_get_contents($upload['tmp_name']);
+    if (!is_string($data) || strlen($data) !== $size || !str_starts_with($data, '%PDF-')) {
+        $failureReason = 'The uploaded file is not a valid PDF.';
+        return null;
+    }
+
+    $originalFilename = is_string($upload['name'] ?? null) ? basename(str_replace('\\', '/', $upload['name'])) : '';
+    $filename = preg_replace('/[^A-Za-z0-9._ -]/', '_', $originalFilename);
+    $filename = is_string($filename) ? trim(substr($filename, 0, 180), " .") : '';
+    if ($filename === '' || strtolower(pathinfo($filename, PATHINFO_EXTENSION)) !== 'pdf') {
+        $filename = 'update-attachment.pdf';
+    }
+
+    return ['data' => $data, 'filename' => $filename];
+}
+
 function save_uploaded_update_image(string $temporaryPath, string $destinationPath, string &$failureReason): bool
 {
     $warnings = [];
@@ -97,7 +137,7 @@ function save_uploaded_update_image(string $temporaryPath, string $destinationPa
 
 if ($editingId !== false && $editingId !== null) {
     $editQuery = $pdo->prepare(
-        'SELECT id, title, body, category, status, image_path FROM member_announcements WHERE id = ? LIMIT 1'
+        'SELECT id, title, body, category, status, image_path, attachment_filename FROM member_announcements WHERE id = ? LIMIT 1'
     );
     $editQuery->execute([$editingId]);
     $editing = $editQuery->fetch() ?: null;
@@ -139,7 +179,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             $editing = null;
             if ($editingId !== false && $editingId !== null) {
                 $editQuery = $pdo->prepare(
-                    'SELECT id, title, body, category, status, image_path FROM member_announcements WHERE id = ? LIMIT 1'
+                    'SELECT id, title, body, category, status, image_path, attachment_filename FROM member_announcements WHERE id = ? LIMIT 1'
                 );
                 $editQuery->execute([$editingId]);
                 $editing = $editQuery->fetch() ?: null;
@@ -193,6 +233,20 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 }
             }
 
+            $uploadedAttachment = null;
+            $attachmentFile = $_FILES['attachment'] ?? null;
+            if ($error === '' && is_array($attachmentFile)) {
+                $attachmentFailure = '';
+                $uploadedAttachment = uploaded_update_attachment($attachmentFile, $attachmentFailure);
+                if ($attachmentFailure !== '') {
+                    $error = $attachmentFailure;
+                }
+            }
+            $removeAttachment = ($_POST['remove_attachment'] ?? '') === '1';
+            if ($error === '' && $removeAttachment && $uploadedAttachment !== null) {
+                $error = 'Choose either a replacement PDF or remove the current attachment, not both.';
+            }
+
             $currentImage = $editing ? existing_update_image_filename($editing['image_path'] ?? null) : null;
             if ($error === '' && !$editing && $uploadedImage === null) {
                 $error = 'Choose an image for this update.';
@@ -226,16 +280,47 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                         $saveQuery = $pdo->prepare(
                             "UPDATE member_announcements
                              SET title = ?, body = ?, category = ?, status = ?, image_path = ?,
+                                 attachment_data = CASE WHEN ? = 1 THEN ? ELSE attachment_data END,
+                                 attachment_filename = CASE WHEN ? = 1 THEN ? ELSE attachment_filename END,
                                  published_at = CASE WHEN ? = 'published' THEN COALESCE(published_at, NOW()) ELSE NULL END
                              WHERE id = ?"
                         );
-                        $saveQuery->execute([$title, $body, $category, $status, $imagePath, $status, $editingId]);
+                        $attachmentChanged = $uploadedAttachment !== null || $removeAttachment;
+                        $attachmentData = $uploadedAttachment['data'] ?? null;
+                        $attachmentFilename = $uploadedAttachment['filename'] ?? null;
+                        if ($removeAttachment) {
+                            $attachmentData = null;
+                            $attachmentFilename = null;
+                        }
+                        $saveQuery->execute([
+                            $title,
+                            $body,
+                            $category,
+                            $status,
+                            $imagePath,
+                            $attachmentChanged ? 1 : 0,
+                            $attachmentData,
+                            $attachmentChanged ? 1 : 0,
+                            $attachmentFilename,
+                            $status,
+                            $editingId,
+                        ]);
                     } else {
                         $saveQuery = $pdo->prepare(
-                            "INSERT INTO member_announcements (title, body, image_path, category, status, published_at)
-                             VALUES (?, ?, ?, ?, ?, CASE WHEN ? = 'published' THEN NOW() ELSE NULL END)"
+                            "INSERT INTO member_announcements
+                                (title, body, image_path, attachment_data, attachment_filename, category, status, published_at)
+                             VALUES (?, ?, ?, ?, ?, ?, ?, CASE WHEN ? = 'published' THEN NOW() ELSE NULL END)"
                         );
-                        $saveQuery->execute([$title, $body, $imagePath, $category, $status, $status]);
+                        $saveQuery->execute([
+                            $title,
+                            $body,
+                            $imagePath,
+                            $uploadedAttachment['data'] ?? null,
+                            $uploadedAttachment['filename'] ?? null,
+                            $category,
+                            $status,
+                            $status,
+                        ]);
                     }
                 } catch (PDOException $saveError) {
                     delete_update_image($newImagePath);
@@ -259,7 +344,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 }
 
 $updatesQuery = $pdo->query(
-    'SELECT id, title, category, status, published_at, created_at, image_path
+    'SELECT id, title, category, status, published_at, created_at, image_path, attachment_filename
      FROM member_announcements ORDER BY created_at DESC, id DESC'
 );
 $updates = $updatesQuery->fetchAll();
@@ -330,6 +415,9 @@ function escape_update_admin(string $value): string
         <div class="message">Current image. Upload a replacement if you want to change it.</div>
         <img src="../images/updates/<?= rawurlencode($currentImage) ?>" alt="Current update image" style="display:block;width:min(100%,420px);max-height:220px;object-fit:cover;margin:0 0 16px;border-radius:9px" />
       <?php endif; ?>
+      <?php if ($editing && is_string($editing['attachment_filename'] ?? null) && $editing['attachment_filename'] !== ''): ?>
+        <div class="message">Current PDF attachment: <?= escape_update_admin((string)$editing['attachment_filename']) ?>. Upload a replacement or select Remove current attachment.</div>
+      <?php endif; ?>
       <form method="post" action="updates.php" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="<?= escape_update_admin($csrfToken) ?>" />
         <input type="hidden" name="action" value="save" />
@@ -341,6 +429,15 @@ function escape_update_admin(string $value): string
         <label for="image">Card image</label>
         <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp" <?= $editing && existing_update_image_filename($editing['image_path'] ?? null) !== null ? '' : 'required' ?> />
         <p class="help">JPEG, PNG, or WebP; maximum 5 MB. This image appears behind the title on the Updates page.</p>
+        <label for="attachment">PDF attachment <span>(optional)</span></label>
+        <input id="attachment" name="attachment" type="file" accept="application/pdf,.pdf" />
+        <p class="help">PDF only, maximum 5 MB. Members can download the attachment from the published update.</p>
+        <?php if ($editing && is_string($editing['attachment_filename'] ?? null) && $editing['attachment_filename'] !== ''): ?>
+          <label style="display:flex;align-items:center;gap:8px;font-weight:500">
+            <input type="checkbox" name="remove_attachment" value="1" />
+            Remove current attachment
+          </label>
+        <?php endif; ?>
         <label for="category">Category</label>
         <select id="category" name="category">
           <?php foreach ($categories as $key => $label): ?>
@@ -370,6 +467,7 @@ function escape_update_admin(string $value): string
                 <span class="update-title"><?= escape_update_admin((string)$update['title']) ?></span>
                 <span class="update-meta"><?= escape_update_admin(ucfirst((string)$update['category'])) ?><?php if ($update['published_at']): ?> · <?= escape_update_admin(date('M j, Y', strtotime((string)$update['published_at']))) ?><?php endif; ?></span>
                 <span class="badge<?= $update['status'] === 'published' ? ' published' : '' ?>"><?= escape_update_admin((string)$update['status']) ?></span>
+                <?php if (is_string($update['attachment_filename'] ?? null) && $update['attachment_filename'] !== ''): ?><span class="badge">PDF attached</span><?php endif; ?>
               </div>
               <div class="row-actions">
                 <a class="button secondary" href="updates.php?id=<?= (int)$update['id'] ?>">Edit</a>

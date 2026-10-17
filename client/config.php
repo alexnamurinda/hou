@@ -78,6 +78,8 @@ function ensure_member_tables(PDO $pdo): void
             title VARCHAR(180) NOT NULL,
             body TEXT NOT NULL,
             image_path VARCHAR(255) NULL,
+            attachment_data MEDIUMBLOB NULL,
+            attachment_filename VARCHAR(180) NULL,
             category ENUM('general', 'event', 'important', 'maintenance') NOT NULL DEFAULT 'general',
             status ENUM('draft', 'published') NOT NULL DEFAULT 'draft',
             published_at TIMESTAMP NULL DEFAULT NULL,
@@ -88,6 +90,7 @@ function ensure_member_tables(PDO $pdo): void
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
     ensure_member_announcement_image_path($pdo);
+    ensure_member_announcement_attachment_columns($pdo);
 
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS member_announcement_reads (
@@ -168,6 +171,29 @@ function ensure_member_announcement_image_path(PDO $pdo): void
             $columns = $pdo->query('SHOW COLUMNS FROM member_announcements')->fetchAll(PDO::FETCH_COLUMN);
             if (!in_array('image_path', $columns, true)) {
                 throw $error;
+            }
+        }
+    }
+}
+
+function ensure_member_announcement_attachment_columns(PDO $pdo): void
+{
+    $columns = $pdo->query('SHOW COLUMNS FROM member_announcements')->fetchAll(PDO::FETCH_COLUMN);
+    $existingColumns = array_fill_keys($columns, true);
+    $attachmentColumns = [
+        'attachment_data' => 'MEDIUMBLOB NULL',
+        'attachment_filename' => 'VARCHAR(180) NULL',
+    ];
+
+    foreach ($attachmentColumns as $column => $definition) {
+        if (!isset($existingColumns[$column])) {
+            try {
+                $pdo->exec('ALTER TABLE member_announcements ADD COLUMN ' . $column . ' ' . $definition);
+            } catch (PDOException $error) {
+                $columns = $pdo->query('SHOW COLUMNS FROM member_announcements')->fetchAll(PDO::FETCH_COLUMN);
+                if (!in_array($column, $columns, true)) {
+                    throw $error;
+                }
             }
         }
     }

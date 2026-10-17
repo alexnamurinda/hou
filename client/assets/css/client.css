@@ -2097,18 +2097,6 @@ a {
     linear-gradient(135deg, #0f172a, #164e8a);
 }
 
-.update-card-placeholder {
-  position: absolute;
-  z-index: 0;
-  display: grid;
-  width: 100%;
-  height: 100%;
-  place-items: center;
-  color: rgba(255, 255, 255, .2);
-  font-size: clamp(72px, 12vw, 140px);
-  inset: 0;
-}
-
 .update-card::after {
   position: absolute;
   z-index: 1;
@@ -2201,14 +2189,10 @@ a {
 }
 
 .update-detail-image-placeholder {
-  display: grid;
   height: clamp(220px, 32vw, 360px);
-  place-items: center;
-  color: rgba(255, 255, 255, .45);
   background:
     radial-gradient(ellipse at 82% 20%, rgba(14, 165, 233, .55), transparent 35%),
     linear-gradient(135deg, #0f172a, #164e8a);
-  font-size: clamp(72px, 12vw, 140px);
 }
 
 .update-detail-copy {
@@ -2231,6 +2215,27 @@ a {
   font-size: 15px;
   line-height: 1.8;
   overflow-wrap: anywhere;
+}
+
+.update-attachment-link {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 14px;
+  margin-top: 22px;
+  color: #0754c5;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.update-attachment-link i {
+  flex: 0 0 auto;
+  color: #dc2626;
 }
 
 .updates-empty {

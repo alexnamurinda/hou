@@ -35,6 +35,8 @@ CREATE TABLE IF NOT EXISTS member_announcements (
   title VARCHAR(180) NOT NULL,
   body TEXT NOT NULL,
   image_path VARCHAR(255) NULL,
+  attachment_data MEDIUMBLOB NULL,
+  attachment_filename VARCHAR(180) NULL,
   category ENUM('general', 'event', 'important', 'maintenance') NOT NULL DEFAULT 'general',
   status ENUM('draft', 'published') NOT NULL DEFAULT 'draft',
   published_at TIMESTAMP NULL DEFAULT NULL,

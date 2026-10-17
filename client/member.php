@@ -99,7 +99,7 @@ if ($section === 'updates') {
     $updateId = filter_var($_GET['update'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
     if ($updateId !== false && $updateId !== null) {
         $updateQuery = db_connect()->prepare(
-            "SELECT id, title, body, category, published_at, image_path
+            "SELECT id, title, body, category, published_at, image_path, attachment_filename
              FROM member_announcements
              WHERE id = ? AND status = 'published' AND (published_at IS NULL OR published_at <= NOW())
              LIMIT 1"
@@ -234,7 +234,7 @@ header('X-Content-Type-Options: nosniff');
   <link rel="icon" type="image/png" href="../images/hou_logo.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/client.css?v=20261017-4" />
+  <link rel="stylesheet" href="assets/css/client.css?v=20261017-5" />
 </head>
 <body class="portal-dashboard-body">
   <div class="portal-shell">
@@ -377,11 +377,17 @@ header('X-Content-Type-Options: nosniff');
               <?php if ($selectedImageUrl !== null): ?>
                 <img class="update-detail-image" src="<?= escape_html($selectedImageUrl) ?>" alt="" />
               <?php else: ?>
-                <div class="update-detail-image-placeholder"><i class="fa-solid fa-bullhorn" aria-hidden="true"></i></div>
+                <div class="update-detail-image-placeholder" aria-hidden="true"></div>
               <?php endif; ?>
               <div class="update-detail-copy">
                 <a class="update-back-link" href="member.php?section=updates"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> All updates</a>
                 <p><?= nl2br(escape_html((string)$selectedUpdate['body'])) ?></p>
+                <?php if (is_string($selectedUpdate['attachment_filename'] ?? null) && $selectedUpdate['attachment_filename'] !== ''): ?>
+                  <a class="update-attachment-link" href="api/updates/attachment.php?id=<?= (int)$selectedUpdate['id'] ?>" download>
+                    <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
+                    Download PDF: <?= escape_html((string)$selectedUpdate['attachment_filename']) ?>
+                  </a>
+                <?php endif; ?>
               </div>
             </article>
           <?php elseif ($updates): ?>
@@ -398,8 +404,6 @@ header('X-Content-Type-Options: nosniff');
                 <article class="update-card<?= $imageUrl === null ? ' update-card-no-image' : '' ?>">
                   <?php if ($imageUrl !== null): ?>
                     <img src="<?= escape_html($imageUrl) ?>" alt="" loading="lazy" />
-                  <?php else: ?>
-                    <div class="update-card-placeholder" aria-hidden="true"><i class="fa-solid fa-bullhorn"></i></div>
                   <?php endif; ?>
                   <div class="update-card-overlay">
                     <span class="update-category"><?= escape_html(ucfirst((string)$update['category'])) ?></span>
